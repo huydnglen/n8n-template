@@ -1,0 +1,75 @@
+Workflow này được xây dựng trên nền tảng n8n (một công cụ tự động hóa workflow mã nguồn mở), với mục đích chính là tự động hóa việc tìm kiếm và xử lý từ khóa liên quan từ Google Trends. Cụ thể:
+
+Mục tiêu tổng thể:
+Lấy danh sách từ khóa từ một Google Sheet cụ thể.
+Sử dụng API của SerpApi (một dịch vụ proxy cho Google Trends) để lấy các "related queries" (truy vấn liên quan) từ Google Trends, tập trung vào các truy vấn "rising" (tăng trưởng) và "top" (phổ biến nhất) trong 12 tháng qua tại Việt Nam (geo: VN).
+Xử lý dữ liệu: Lọc bỏ các từ khóa không mong muốn (liên quan đến sửa chữa, bảo trì, lỗi, v.v.), loại bỏ trùng lặp, sắp xếp theo lượng tìm kiếm, giới hạn tối đa 20 từ khóa, và tạo chuỗi hashtags (ví dụ: #tukhoalienquan).
+Lưu kết quả: Thêm các từ khóa liên quan và lượng tìm kiếm vào một sheet khác, đồng thời cập nhật chuỗi hashtags vào sheet gốc.
+
+
+Đặc điểm nổi bật:
+Workflow này xử lý dữ liệu theo batch (nhiều item từ sheet), nhưng có cơ chế chờ (wait) 30 giây giữa các lần gọi API để tránh rate limit từ SerpApi.
+Sử dụng JavaScript để xử lý logic phức tạp (lọc, chuyển đổi, tạo hashtags).
+Không có vòng lặp rõ ràng, nhưng thiết kế cho phép xử lý nhiều từ khóa liên tiếp từ sheet.
+Yêu cầu credentials: API key từ SerpApi và OAuth2 cho Google Sheets.
+Thời gian dữ liệu: Google Trends lấy dữ liệu từ "today 12-m" (12 tháng gần nhất).
+Lọc từ khóa: Loại bỏ các từ như "sửa", "bảo hành", "lỗi", "xổ số" để tập trung vào nội dung tích cực hoặc liên quan.
+
+Luồng Dữ Liệu:
+
+Trigger kích hoạt → Thiết lập biến (Edit Fields).
+Đọc từ khóa từ sheet (Lấy từ khóa).
+Chờ 30 giây (Wait).
+Gọi API Google Trends (Get Google Trends).
+Xử lý và lọc dữ liệu (Chuyển đổi...).
+Lưu related queries vào sheet mới.
+Cập nhật hashtags vào sheet gốc.
+Nếu có lỗi (ví dụ: API error hoặc không có related queries), hàm Function sẽ trả về thông báo lỗi thay vì lưu dữ liệu.
+
+Hướng Dẫn Sử Dụng Workflow
+Để sử dụng workflow này, bạn cần có tài khoản n8n (cài đặt local hoặc cloud). Dưới đây là hướng dẫn từng bước:
+
+Chuẩn Bị:
+
+Tài khoản SerpApi: Đăng ký tại serpapi.com để lấy API key. Workflow sử dụng key mẫu ("6ad190e849f4e468c841982d8d0bd3b01fc3d918c829d4ca6fad48996606b8b7") – thay bằng key của bạn để tránh hết hạn hoặc rate limit.
+Google Sheets:
+
+Tạo hoặc sử dụng sheet với ID "1-e7BOY62Vn2wX1ekb4UREefNU1te-f08M1xRi3csdCg" (hoặc thay đổi trong Edit Fields).
+Sheet gốc: "Trang tính8" (gid=239419505) – Cần có cột "Từ khóa" (danh sách từ khóa cần tìm) và "kết quả" (để lưu hashtags).
+Sheet lưu: "search" (gid=745302151) – Cần có cột "từ khóa" và "số lượng tìm kiếm".
+
+Credentials trong n8n:
+Google Sheets: Tạo credential OAuth2 (tên: "Google Sheets account", ID: "lwtfwCmTBg4lm7hg"). Kết nối với tài khoản Google có quyền chỉnh sửa sheet.
+Không cần credential riêng cho HTTP Request (SerpApi dùng query param).
+
+Import Workflow vào n8n:
+Mở n8n dashboard.
+Chọn "Workflows" > "Import from JSON" (hoặc paste JSON trực tiếp vào editor).
+Paste toàn bộ nội dung JSON từ <document> vào.</document>
+Lưu workflow với tên như "Search Từ Khóa Google Trends".
+
+
+Cấu Hình và Test:
+
+  Chỉnh sửa Node:
+  Edit Fields: Cập nhật id_sheet và api_key nếu cần.
+  Lấy từ khóa: Đảm bảo sheetName và filters đúng (lọc cột "kết quả" để tránh lấy dữ liệu đã có hashtags).
+  Get Google Trends: Kiểm tra query parameters (q lấy từ {{$json["Từ khóa"]}}).
+  Function: Kiểm tra mã JS – bạn có thể chỉnh excludeKeywords nếu muốn thêm/xóa từ lọc.
+  
+  Test Workflow:
+  Nhấp "Test workflow" (kích hoạt Manual Trigger).
+  Workflow sẽ đọc từ sheet, gọi API cho từng từ khóa (nếu sheet có nhiều hàng), chờ 30 giây giữa các lần.
+  Kiểm tra output từng node: Sử dụng "Execute Node" để debug.
+  Nếu lỗi: Kiểm tra console (ví dụ: API error nếu key hết hạn).
+  
+  Ví Dụ Input/Output:
+  Input: Sheet có "Từ khóa" = "coffee".
+  Output: Related queries như "coffee shop", "cà phê sữa" với search_volume, hashtags như "#coffeeshop #caphesua", lưu vào sheets.
+  
+  Chạy Thực Tế:
+  Kích hoạt workflow (set active: true).
+  Chạy thủ công hoặc kết nối với trigger khác (ví dụ: Schedule Trigger để chạy hàng ngày).
+  Theo dõi: Sử dụng n8n's executions log để xem lịch sử chạy, lỗi.
+  Scale: Nếu sheet có nhiều từ khóa (>10), có thể gặp rate limit SerpApi (thay đổi Wait amount lên 60 giây).
+  
