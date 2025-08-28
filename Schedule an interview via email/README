@@ -1,0 +1,83 @@
+1. Giới thiệu
+Workflow flow_pilot, được xây dựng trên nền tảng n8n, tự động hóa quy trình phỏng vấn trong tuyển dụng của Flow Pilot.
+Mục tiêu chính:
+Tự động phân loại và xử lý email ứng viên dựa trên nhãn trong Gmail.
+Gửi email phản hồi, tạo sự kiện Google Calendar, cập nhật Google Sheets và gửi thông báo qua Discord.
+Sử dụng Google Gemini AI để tạo nội dung email chuyên nghiệp và thân thiện.
+Workflow được chia thành ba nhánh chính dựa trên loại phỏng vấn: Phỏng vấn ban đầu (Initial Interview), Phỏng vấn cuối (Final Interview), và Từ chối (Negative).
+Lợi ích: Tiết kiệm thời gian, giảm lỗi thủ công, và đảm bảo phản hồi nhanh chóng, nhất quán cho ứng viên.
+
+2. Điều kiện kích hoạt Workflow
+Workflow chạy tự động theo lịch, không cần kích hoạt thủ công:
+Trigger chính (mỗi 30 phút): Kiểm tra email Gmail mới (node: "30 Minutes"). Quét các email có nhãn liên quan được nhận trong 30 phút gần nhất.
+Trigger phụ (mỗi 15 phút): Riêng cho nhánh Initial Interview (node: "Schedule Trigger"). Kiểm tra Google Calendar để tạo sự kiện mới nếu cần.
+Điều kiện chung khi xử lý email:
+Email phải có ít nhất một nhãn trùng với cấu hình: "Initial interview", "Final interview", hoặc "Negative".
+Chỉ xử lý email nhận trong 30 phút gần nhất (để tránh xử lý lại email cũ).
+Email đã ghi nhận trong Google Sheets (theo địa chỉ email ứng viên) sẽ bị bỏ qua để tránh trùng lặp.
+
+Workflow tích hợp với:
+Gmail API: Đọc và gửi email phản hồi.
+Google Sheets: Lưu dữ liệu ứng viên (ID: 1MlUaUNBy6YaWdBbi87Co1QDkBQ-hHm7g19G3_g8vDRQ).
+Google Calendar: Tạo sự kiện phỏng vấn kèm link Google Meet.
+Discord Webhook: Gửi thông báo cho nhóm.
+Google Gemini AI: Tạo nội dung email và thông báo.
+
+3. Các quy trình chính
+Workflow bắt đầu bằng việc quét email trong Gmail và sau đó điều hướng dựa trên nhãn. Dưới đây là chi tiết từng quy trình.
+3.1. Quy trình chung (áp dụng cho tất cả loại phỏng vấn)
+Lấy danh sách nhãn Gmail (node: "Get Gmail Labels List").
+Cấu hình nhãn & link (node: "Set Interview Config (Labels & Links)"):
+Nhãn 1: "Initial interview".
+Nhãn 2: "Final interview".
+Nhãn 3: "Negative".
+Link:
+JotForm: link
+Booking: link
+Assessment: link
+Google Sheets ID: 1MlUaUNBy6YaWdBbi87Co1QDkBQ-hHm7g19G3_g8vDRQ.
+Tìm email mới (30 phút gần nhất) (node: "Search Interview Emails").
+Tách và lấy nội dung email (nodes: "Split Email List", "Get Email Content").
+Đối chiếu nhãn email (node: "Map & Match Email Labels").
+
+Phân nhánh xử lý:
+"Initial interview" → Nhánh 1
+"Final interview" → Nhánh 2
+"Negative" → Nhánh 3
+Nếu không có email mới hoặc không khớp nhãn, workflow sẽ kết thúc.
+
+3.2. Quy trình Initial Interview
+Điều kiện: Email có nhãn "Initial interview" và chưa tồn tại trong sheet "Initial Interview".
+Lấy thông tin ứng viên từ email (node: "ExtractSenderEmail1").
+Kiểm tra dữ liệu trong Sheets để tránh trùng lặp.
+Tạo email phản hồi bằng AI (node: "Generate Candidate Reply Email"):
+Nội dung: thư cảm ơn + link JotForm + Booking.
+Người ký: Russel Praga, Project Manager.
+Gửi email ứng viên (nodes: "Format Email", "Send Candidate Email").
+Lưu dữ liệu vào Google Sheets (node: "Save Event Info to Google Sheets1").
+Quy trình phụ (chạy 15 phút/lần):
+Lấy dữ liệu từ sheet "Initial Interview".
+Lấy sự kiện trong Google Calendar.
+Lọc sự kiện hợp lệ.
+Tạo sự kiện mới với link Google Meet.
+Lưu thông tin sự kiện vào Sheets.
+Tạo thông báo bằng AI và gửi lên Discord.
+
+3.3. Quy trình Final Interview
+Điều kiện: Email có nhãn "Final interview" và chưa tồn tại trong sheet "Final Interview".
+Trích xuất thông tin ứng viên (node: "ExtractEmailMetadata").
+Đặt cấu hình người phỏng vấn (node: "Set discord_webhook and Final Interviewer").
+Kiểm tra dữ liệu trong Sheets để tránh trùng lặp.
+Tạo email xác nhận vòng cuối bằng AI kèm link Assessment.
+Gửi email (subject: "One Step Closer! Flow Pilot Automations Specialist Talent Assessment").
+Tạo sự kiện Google Calendar kèm Google Meet.
+Lưu dữ liệu vào sheet "Final Interview".
+Gửi thông báo lên Discord.
+
+3.4. Quy trình Negative (Từ chối)
+Điều kiện: Email có nhãn "Negative" và chưa tồn tại trong sheet "Negative".
+Lấy thông tin ứng viên (node: "ExtractSenderEmail").
+Kiểm tra dữ liệu trong Sheets để tránh trùng lặp.
+Tạo email từ chối bằng AI, với nội dung lịch sự, khuyến khích ứng viên ứng tuyển lại trong tương lai.
+Gửi email (subject: "Regarding Your Application").
+Lưu dữ liệu vào sheet "Negative".
