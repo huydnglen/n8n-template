@@ -1,0 +1,1103 @@
+{
+  "name": "chatbottele_nhacnho",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a9438d28-f205-474e-bf29-154c64fc93bd",
+              "name": "id_googlesheet",
+              "value": "1uS-8ZToOtJ5D5vuzlQqWZG7FYoz9TNgJDgioBp21jzM",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -112,
+        -240
+      ],
+      "id": "a0abba61-3a6f-451a-b182-35e04e403000",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -320,
+        96
+      ],
+      "id": "e5e24b0a-6a06-4c71-a9fa-a2f1d43b0739",
+      "name": "Telegram Trigger",
+      "webhookId": "3d1fa411-812a-45be-9a7d-a89bc81b46d5",
+      "credentials": {
+        "telegramApi": {
+          "id": "8NnFtjCmwgnDX5wV",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "=8116258478",
+        "text": "=Số tiền khách hàng {{ $('Check số tiền chuyển khoản').item.json['Tên khách hàng'] }} - mã ID: {{ $('Check số tiền chuyển khoản').item.json.ID }} chuyển khoản không chính xác\nSố tiền cần chuyển: {{ $('Check số tiền chuyển khoản').item.json['Số tiền (VND)'] }} VND\nSô tiền đã chuyển: {{ $('Chuyển định dạng text sang json').item.json['số_tiền'] }} VND\nVui Lòng kiểm tra lại và thông báo cho khách hàng!",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2448,
+        0
+      ],
+      "id": "56460078-02fa-4843-b29a-dbe30a2e75ef",
+      "name": "Thông báo cho CSKH",
+      "webhookId": "a5b6e035-61fe-42b2-b39e-45d321625057",
+      "notesInFlow": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "8NnFtjCmwgnDX5wV",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.ID }}",
+        "text": "=Số tiền quý khách hàng chuyển khoản không chính xác\nSố tiền cần chuyển: {{ $json['Số tiền (VND)'] }} VND\nSô tiền đã chuyển: {{ $('Chuyển định dạng text sang json').item.json['số_tiền'] }} VND\nVui Lòng kiểm tra lại và thông báo cho CSKH!\nXin chân thành cảm ơn!",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2256,
+        0
+      ],
+      "id": "27b99df1-da36-4ec3-9b48-64ba2608ffb6",
+      "name": "Thông báo cho KH",
+      "webhookId": "a5b6e035-61fe-42b2-b39e-45d321625057",
+      "notesInFlow": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "8NnFtjCmwgnDX5wV",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=Tin nhắn của quý khách không phải là ảnh chuyển khoản hoặc ảnh quá mờ!\nVui lòng kiểm tra lại nội dung tin nhắn!\nXin chân thành cảm ơn!",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        576,
+        528
+      ],
+      "id": "7d6dea44-fbfc-4976-8708-06c05d135fb7",
+      "name": "Thông báo cho KH (1)",
+      "webhookId": "a5b6e035-61fe-42b2-b39e-45d321625057",
+      "notesInFlow": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "8NnFtjCmwgnDX5wV",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1dfdb5ac-130f-4d12-accb-f5de0dba1bfe",
+              "leftValue": "={{ $('Telegram Trigger').item.json.message.photo[2].file_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        80,
+        96
+      ],
+      "id": "f6a28b8a-fc6a-4a04-b57e-3c40b7924b09",
+      "name": "Check tin nhắn dạng ảnh"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/{{ $json.token_tele }}/getFile?file_id={{ $('Telegram Trigger').item.json.message.photo[2].file_id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        368,
+        80
+      ],
+      "id": "9bca3b32-6405-4994-83a9-9cf75793753e",
+      "name": "Tìm file path của ảnh"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lấy text từ kết quả Gemini\nconst rawText = $json.content.parts[0].text;\n\n// Xoá dấu ```json ... ```\nconst cleanText = rawText\n  .replace(/```json/gi, '')\n  .replace(/```/g, '')\n  .trim();\n\n// Parse sang object\nconst data = JSON.parse(cleanText);\n\n// Chuyển \"8,700,000 VND\" -> 8700000\nif (data[\"số_tiền\"]) {\n  // Xoá tất cả ký tự không phải số\n  const numberStr = data[\"số_tiền\"].replace(/[^0-9]/g, '');\n  data[\"số_tiền\"] = Number(numberStr);\n}\n\nreturn [{\n  json: data\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1184,
+        80
+      ],
+      "id": "ff823428-2406-4cfd-89eb-0bf4aad82586",
+      "name": "Chuyển định dạng text sang json"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Edit Fields2').item.json.id_googlesheet }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Dịch vụ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uS-8ZToOtJ5D5vuzlQqWZG7FYoz9TNgJDgioBp21jzM/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Thanh toán"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1376,
+        80
+      ],
+      "id": "0276682e-ce70-4ef3-998c-21ceecc81385",
+      "name": "Lấy thông tin khách hàng",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GPb8CLBQ6D5yAphG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8dc2abfd-7a12-43c0-9c22-d9906de38406",
+              "leftValue": "={{ $('Chuyển định dạng text sang json').item.json['số_tiền'] }}",
+              "rightValue": "={{ $json['Số tiền (VND)'] }}",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2000,
+        -144
+      ],
+      "id": "c7b67ed5-3e39-4e9d-889b-2e10db6ffbbd",
+      "name": "Check số tiền chuyển khoản"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Edit Fields2').item.json.id_googlesheet }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Dịch vụ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uS-8ZToOtJ5D5vuzlQqWZG7FYoz9TNgJDgioBp21jzM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [
+            "Nội dung chuyển tiền"
+          ],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        2256,
+        -256
+      ],
+      "id": "292b8aac-0d5d-418b-ab0c-e7a8dfa98dd7",
+      "name": "Cập nhật trạng thái đã thanh toán",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GPb8CLBQ6D5yAphG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Telegram Trigger').item.json.message.from.username }}_{{ $('Telegram Trigger').item.json.message.chat.id }}_{{ $json.result.file_unique_id }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "167iFK5EWqoTiYymweztc7OvJvQUk_ust",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/167iFK5EWqoTiYymweztc7OvJvQUk_ust"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        992,
+        288
+      ],
+      "id": "b453e793-8118-42b7-b6fd-8d8f86081a4e",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wSNfHGfsGgg8QVhc",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5780baaf-6d6e-479e-97ce-793bc445fb65",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "/start",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        368,
+        400
+      ],
+      "id": "be5b6175-944d-4040-bc8c-e600a03946a4",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Edit Fields2').item.json.id_googlesheet }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1834079287,
+          "mode": "list",
+          "cachedResultName": "Danh sách khách hàng",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uS-8ZToOtJ5D5vuzlQqWZG7FYoz9TNgJDgioBp21jzM/edit#gid=1834079287"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.message.chat.id }}",
+            "username": "={{ $json.message.chat.username }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        576,
+        320
+      ],
+      "id": "6d00b28e-14c9-416b-a96d-4b53c6dd0300",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GPb8CLBQ6D5yAphG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -320,
+        -240
+      ],
+      "id": "3d7b0e00-cfa5-4f6c-9d71-0e7e61c9c5a1",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "chatId": "=8116258478",
+        "text": "=Nội dung chuyển khoản của khách hàng {{ $json.result.chat.username }}  - mã ID: {{ $json.result.chat.id }} không chính xác!\nVui Lòng kiểm tra lại và thông báo cho khách hàng!",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2192,
+        272
+      ],
+      "id": "09b97a79-b9f6-489a-90ca-48e7e991d21a",
+      "name": "Thông báo cho CSKH1",
+      "webhookId": "a5b6e035-61fe-42b2-b39e-45d321625057",
+      "notesInFlow": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "8NnFtjCmwgnDX5wV",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "=Nội dung chuyển khoản của quý khách hàng chuyển khoản không chính xác\nVui Lòng kiểm tra lại và thông báo cho CSKH!\nXin chân thành cảm ơn!",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2000,
+        272
+      ],
+      "id": "a6d01e12-840d-401c-ae58-6d7f6c487e6c",
+      "name": "Thông báo cho KH1",
+      "webhookId": "a5b6e035-61fe-42b2-b39e-45d321625057",
+      "notesInFlow": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "8NnFtjCmwgnDX5wV",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6be4c047-a087-4d55-954e-07a87ba9f8e4",
+              "name": "token_tele",
+              "value": "bot7373552463:AAEgQSX3zuajx2U8CkBJTrPqzmueRoM5v6A",
+              "type": "string"
+            },
+            {
+              "id": "585e4141-ac82-4754-9adc-5a1acabfa96a",
+              "name": "id_googlesheet",
+              "value": "1uS-8ZToOtJ5D5vuzlQqWZG7FYoz9TNgJDgioBp21jzM",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -112,
+        96
+      ],
+      "id": "d600ba55-55b7-4612-a829-451f0fdf7e1d",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c45d6e0e-3c46-414d-aec5-4fdde6e181be",
+              "leftValue": "={{ $('Chuyển định dạng text sang json').item.json['nội_dung_chuyển_khoản'] }}",
+              "rightValue": "={{ $json['Nội dung chuyển tiền'] }}",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "c6355b53-95de-421a-b4cd-3652efdd9944",
+              "leftValue": "={{ $json.ID }}",
+              "rightValue": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1568,
+        80
+      ],
+      "id": "e33c1152-72cc-46af-b0af-6cfd7149ffe2",
+      "name": "Filter",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "92a78f9b-f809-4e84-93ea-22d5b49fd4af",
+              "leftValue": "={{ $json.ID }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1792,
+        80
+      ],
+      "id": "0ddb6ae0-ecd3-4918-80ea-b7dcd6238454",
+      "name": "Check nội dung chuyển khoản"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Edit Fields').item.json.id_googlesheet }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Trang tính1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uS-8ZToOtJ5D5vuzlQqWZG7FYoz9TNgJDgioBp21jzM/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Thanh toán"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        80,
+        -240
+      ],
+      "id": "0dc2bd41-eec0-4754-a24b-abfc9d56e572",
+      "name": "Lấy danh sách chưa thanh toán",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GPb8CLBQ6D5yAphG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lấy dữ liệu từ Google Sheets\nconst rows = $input.all();\n\n// Ngày hiện tại (bỏ giờ)\nconst today = new Date();\ntoday.setHours(0,0,0,0);\n\n// Tính ngày hôm nay + 5 ngày\nconst todayPlus5 = new Date(today);\ntodayPlus5.setDate(todayPlus5.getDate() + 11);\n\nreturn rows.filter(item => {\n  const rawDate = item.json[\"Ngày hết hạn\"]; // ví dụ 08/09/2025\n  if (!rawDate) return false;\n\n  // Chuyển từ DD/MM/YYYY -> YYYY-MM-DD để new Date hiểu đúng\n  const [day, month, year] = rawDate.split(\"/\");\n  const normalizedDate = `${year}-${month}-${day}`;\n\n  const expireDate = new Date(normalizedDate);\n  expireDate.setHours(0,0,0,0);\n\n  // Giữ lại nếu ngày hết hạn <= hôm nay + 6 ngày\n  return expireDate <= todayPlus5;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        -240
+      ],
+      "id": "6be79072-2dbf-44e3-9a4a-5c764137b6a5",
+      "name": "Lọc những khách hàng đến hạn"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "766e6cce-3ad0-40a7-9cbe-bab944e75bbf",
+              "name": "noi_dung_tin_nhan",
+              "value": "=Kính chào khách hàng {{ $json['Tên khách hàng'] }},\nDịch vụ {{ $json['Tên dịch vụ'] }} của quý khách sẽ hết hạn vào ngày {{ $json['Ngày hết hạn'] }}.\nPhí gia hạn: {{ $json['Số tiền (VND)'] }} VND\nNội dung chuyển khoản: {{ $json['Nội dung chuyển tiền'] }}\nLưu ý: Vui lòng điền đúng số tiền và nội dung chuyển khoản!\nQuý khách vui lòng gia hạn sớm để dịch vụ không bị gián đoạn.\nXin chân thành cảm ơn!",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        576,
+        -240
+      ],
+      "id": "9a7142b3-efa2-4c1d-b512-177dbb4f139e",
+      "name": "tạo nội dung tin nhắn"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Lọc những khách hàng đến hạn').item.json.ID }}",
+        "text": "={{ $json.noi_dung_tin_nhan }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        784,
+        -240
+      ],
+      "id": "6b8f8098-ab41-4932-885a-dd73a95a66be",
+      "name": "Gửi nhắc nhở cho khách hàng",
+      "webhookId": "a5b6e035-61fe-42b2-b39e-45d321625057",
+      "notesInFlow": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "8NnFtjCmwgnDX5wV",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "=Quý khách đã thanh toán thành công. \nChúc quý khách có một ngày thật tốt lành!\nXin chân thành cảm ơn!",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2464,
+        -256
+      ],
+      "id": "59e20c10-8bb7-4a16-8975-f3fe3c4a09d0",
+      "name": "Thông báo cho KH2",
+      "webhookId": "a5b6e035-61fe-42b2-b39e-45d321625057",
+      "notesInFlow": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "8NnFtjCmwgnDX5wV",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "=8116258478",
+        "text": "=Số tiền khách hàng {{ $('Check số tiền chuyển khoản').item.json['Tên khách hàng'] }} - mã ID: {{ $('Check số tiền chuyển khoản').item.json.ID }} chuyển khoản không chính xác\nSố tiền cần chuyển: {{ $('Check số tiền chuyển khoản').item.json['Số tiền (VND)'] }} VND\nSô tiền đã chuyển: {{ $('Chuyển định dạng text sang json').item.json['số_tiền'] }} VND\nVui Lòng kiểm tra lại và thông báo cho khách hàng!",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2672,
+        -256
+      ],
+      "id": "3180cd5f-b347-441b-8457-b00b66ff0fdf",
+      "name": "Thông báo cho CSKH2",
+      "webhookId": "a5b6e035-61fe-42b2-b39e-45d321625057",
+      "notesInFlow": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "8NnFtjCmwgnDX5wV",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/file/{{ $('Edit Fields2').item.json.token_tele }}/{{ $json.result.file_path }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        576,
+        80
+      ],
+      "id": "165044d3-5773-4ae9-9140-4b4a6e87744a",
+      "name": "download image"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.item;\nitem.binary.data.mimeType = 'image/jpeg';  // đổi mime type\nreturn item;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        784,
+        80
+      ],
+      "id": "12cbf7d2-e4ce-472e-935e-280135a71791",
+      "name": "convert to image/jpeg"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-1.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-1.5-flash"
+        },
+        "text": "=This image is a bank transfer receipt. Please analyze the content of the image and extract the information in JSON format as follows:\n\njson\nCopy\nEdit\n{\n  \"amount\": \"<Transferred amount, as an integer, e.g., 10000>\",\n  \"transaction_datetime\": \"<Transaction time, in ISO format or DD/MM/YYYY HH:mm>\",\n  \"transfer_description\": \"<Transaction code or the description shown in the image, if available>\"\n}\nNotes:\n\nThe transaction code or the line of text printed right below the recipient’s account number may be the transfer description — please prioritize extracting this value.\n\nIf there is no clearly labeled transfer description, take the line of text located immediately after or directly below the recipient’s account number as the description.",
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        992,
+        80
+      ],
+      "id": "bfd27610-638a-42ca-9323-cbad21fd663b",
+      "name": "analyze image to get amount, date, transfer date",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "OQ7uPFeQm3JPxpQ3",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Lấy danh sách chưa thanh toán",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Thông báo cho KH": {
+      "main": [
+        [
+          {
+            "node": "Thông báo cho CSKH",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check tin nhắn dạng ảnh": {
+      "main": [
+        [
+          {
+            "node": "Tìm file path của ảnh",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tìm file path của ảnh": {
+      "main": [
+        [
+          {
+            "node": "download image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chuyển định dạng text sang json": {
+      "main": [
+        [
+          {
+            "node": "Lấy thông tin khách hàng",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lấy thông tin khách hàng": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check số tiền chuyển khoản": {
+      "main": [
+        [
+          {
+            "node": "Cập nhật trạng thái đã thanh toán",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Thông báo cho KH",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Thông báo cho KH (1)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Thông báo cho KH1": {
+      "main": [
+        [
+          {
+            "node": "Thông báo cho CSKH1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Check tin nhắn dạng ảnh",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Check nội dung chuyển khoản",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Thông báo cho CSKH1": {
+      "main": [
+        []
+      ]
+    },
+    "Check nội dung chuyển khoản": {
+      "main": [
+        [
+          {
+            "node": "Check số tiền chuyển khoản",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Thông báo cho KH1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lấy danh sách chưa thanh toán": {
+      "main": [
+        [
+          {
+            "node": "Lọc những khách hàng đến hạn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lọc những khách hàng đến hạn": {
+      "main": [
+        [
+          {
+            "node": "tạo nội dung tin nhắn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "tạo nội dung tin nhắn": {
+      "main": [
+        [
+          {
+            "node": "Gửi nhắc nhở cho khách hàng",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cập nhật trạng thái đã thanh toán": {
+      "main": [
+        [
+          {
+            "node": "Thông báo cho KH2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Thông báo cho KH2": {
+      "main": [
+        [
+          {
+            "node": "Thông báo cho CSKH2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "download image": {
+      "main": [
+        [
+          {
+            "node": "convert to image/jpeg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "convert to image/jpeg": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "analyze image to get amount, date, transfer date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "analyze image to get amount, date, transfer date": {
+      "main": [
+        [
+          {
+            "node": "Chuyển định dạng text sang json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a259014f-7867-41ff-9a3f-17ab5d30bb17",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "dfaacc55a7a89ad988cfabe887f28de88a6f99ccb660fd968e2e75840fe57e2c"
+  },
+  "id": "AYakb98SeMfHDqP4",
+  "tags": []
+}
