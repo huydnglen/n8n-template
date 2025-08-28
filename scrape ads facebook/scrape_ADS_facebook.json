@@ -1,0 +1,1739 @@
+{
+  "name": "scrape_ADS_facebook",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/apify~facebook-ads-scraper/run-sync-get-dataset-items?token=apify_api_lHBtlRljggXZjCgPMKuxhumIMMdTBB0jD7RT",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"activeStatus\": \"active\",\n    \"isDetailsPerAd\": false,\n    \"onlyTotal\": false,\n    \"resultsLimit\": {{ $json['total results'] }},\n    \"startUrls\": [\n        {\n            \"url\": \"https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&is_targeted_country=false&media_type=all&search_type=page&view_all_page_id={{ $json.page_id }}\",\n            \"method\": \"GET\"\n        }\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -240,
+        180
+      ],
+      "id": "2f866958-8f82-4061-a867-6dff57289c22",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "formTitle": "scrape facebook ads",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "page_id"
+            },
+            {
+              "fieldLabel": "total results"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -500,
+        180
+      ],
+      "id": "37920319-62c3-46ff-b81f-d49f90bf7e15",
+      "name": "On form submission",
+      "webhookId": "fe414c9f-9709-4ada-8c52-d7228f0d7ef9"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.displayformat }}",
+                    "rightValue": "MULTI_IMAGES",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "b15b2873-b4f8-4ea2-abd9-7051ae98d3a8"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "MULTI_IMAGES"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "560dcf32-f38a-4563-ab2b-c9061af68a38",
+                    "leftValue": "={{ $json.displayformat }}",
+                    "rightValue": "SINGLE_IMAGE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "SINGLE_IMAGE"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c4ff93d6-dec4-453f-899c-e8b5143aa586",
+                    "leftValue": "={{ $json.displayformat }}",
+                    "rightValue": "VIDEO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "VIDEO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "2d1fd3d1-4c7f-4288-862b-2af1937f46ae",
+                    "leftValue": "={{ $json.displayformat }}",
+                    "rightValue": "CAROUSEL",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "CAROUSEL"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "430672ae-3623-4230-a5c0-41b1bb72060b",
+                    "leftValue": "={{ $json.displayformat }}",
+                    "rightValue": "COLLECTION",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "COLLECTION"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "12582459-c376-4131-80e8-6cac83e37d17",
+                    "leftValue": "={{ $json.displayformat }}",
+                    "rightValue": "INSTANT_EXPERIENCE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "INSTANT_EXPERIENCE"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e0addd55-da2c-4c29-a72c-ce12e10448d6",
+                    "leftValue": "={{ $json.displayformat }}",
+                    "rightValue": "EVENT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "EVENT"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "1de7ccef-e178-4c42-91c4-7119e54aa036",
+                    "leftValue": "={{ $json.displayformat }}",
+                    "rightValue": "TEXT_ONLY",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "TEXT_ONLY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        260,
+        -140
+      ],
+      "id": "83bf89e2-083c-4313-b9f6-78f48e66d3b0",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lấy dữ liệu từ node HTTP Request\nconst items = $input.all();\n\n// Xử lý từng mục (quảng cáo) trong mảng\nreturn items.map(item => {\n  const ad = item.json;\n  const pageInfo = ad.pageInfo?.adLibraryPageInfo?.pageInfo || {};\n  const snapshot = ad.snapshot || {};\n\n  const body= snapshot.body || \"NA\";\n  // Trích xuất image URLs (nối tất cả URL bằng dấu ;)\n  const imageUrls = snapshot.images && snapshot.images.length > 0 \n    ? snapshot.images.map(img => img.resizedImageUrl || '').join('; ') \n    : 'N/A';\n  \n  // Trích xuất video URLs (ưu tiên videoHdUrl, fallback videoSdUrl, thêm preview image nếu cần)\n  const videoUrls = snapshot.videos && snapshot.videos.length > 0 \n    ? snapshot.videos.map(video => {\n        const hdUrl = video.videoHdUrl || '';\n        const sdUrl = video.videoSdUrl || '';\n        const previewUrl = video.videoPreviewImageUrl || '';\n        // Ưu tiên HD, nếu không có thì dùng SD, và thêm preview URL\n        return hdUrl || sdUrl || previewUrl || '';\n      }).filter(url => url).join('; ')\n    : 'N/A';\n\n  return {\n    json: {\n      pageVerification: pageInfo.pageVerification,\n      likes: pageInfo.likes,\n      pageCategory: pageInfo.pageCategory,\n      igUsername: pageInfo.igUsername,\n      igFollowers: pageInfo.igFollowers ,\n      startDate: ad.startDateFormatted || ad.startDate,\n      adArchiveID: ad.adArchiveID || ad.adArchiveId,\n      endDate: ad.endDateFormatted || ad.endDate,\n      displayformat: snapshot.displayFormat,\n      imageUrls: imageUrls,\n      videoUrls: videoUrls,\n      text: body.text,\n      ctaType: snapshot.ctaType,\n      \n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        -40
+      ],
+      "id": "7bf81530-1253-4c93-bbf8-88a06a71cef1",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1s80OGxCaNIrC8fRzCMfrzr4YssrKD_YROY65FhA8bOA",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 51117966,
+          "mode": "list",
+          "cachedResultName": "DATA THÔ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1s80OGxCaNIrC8fRzCMfrzr4YssrKD_YROY65FhA8bOA/edit#gid=51117966"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "adArchiveID": "={{ $json.adArchiveID }}",
+            "pageVerification": "={{ $json.pageVerification }}",
+            "likes": "={{ $json.likes }}",
+            "igUsername": "={{ $json.igUsername }}",
+            "pageCategory": "={{ $json.pageCategory }}",
+            "text": "={{ $json.text }}",
+            "videoUrls": "={{ $json.videoUrls }}",
+            "imageUrls": "={{ $json.imageUrls }}",
+            "displayformat": "={{ $json.displayformat }}",
+            "endDate": "={{ $json.endDate }}",
+            "startDate": "={{ $json.startDate }}",
+            "igFollowers": "={{ $json.igFollowers }}",
+            "CTAType": "={{ $json.ctaType }}"
+          },
+          "matchingColumns": [
+            "adArchiveID"
+          ],
+          "schema": [
+            {
+              "id": "pageVerification",
+              "displayName": "pageVerification",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "likes",
+              "displayName": "likes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "pageCategory",
+              "displayName": "pageCategory",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "igUsername",
+              "displayName": "igUsername",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "igFollowers",
+              "displayName": "igFollowers",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "startDate",
+              "displayName": "startDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "adArchiveID",
+              "displayName": "adArchiveID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "endDate",
+              "displayName": "endDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "displayformat",
+              "displayName": "displayformat",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "imageUrls",
+              "displayName": "imageUrls",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "videoUrls",
+              "displayName": "videoUrls",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "text",
+              "displayName": "text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "CTAType",
+              "displayName": "CTAType",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        260,
+        -380
+      ],
+      "id": "174474de-e753-4ecf-a371-88486f74eb03",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "J0J1yWqJT32XRxHE",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.assemblyai.com/v2/transcript",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Authorization\": \"Bearer 5b3fe8838188442c850007a6c565af67\",\n  \"Content-Type\": \"application/json\"\n}\n",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"audio_url\": \"{{ $json.videoUrls }}\",\n  \"language_code\": \"vi\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        840,
+        -80
+      ],
+      "id": "e3e2807b-8510-46d0-958e-91507d5c4e4c",
+      "name": "Send to AssemblyAI1"
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1040,
+        -80
+      ],
+      "id": "b6a11759-c5e1-47b3-9f6b-9978c3e40bdb",
+      "name": "Wait1",
+      "webhookId": "3d0f10eb-d177-439d-a99d-a11b95e1139a"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.assemblyai.com/v2/transcript/{{ $json.id }}",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Authorization\": \"Bearer 5b3fe8838188442c850007a6c565af67\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1260,
+        -80
+      ],
+      "id": "08fca34f-1bb9-4d86-8c82-adba223a9363",
+      "name": "Check transcript status1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "470d582c-e2eb-43fa-a1f1-7464c3dfe555",
+              "name": "transcript",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1760,
+        -80
+      ],
+      "id": "262ebeab-39cf-48ce-b692-d8b40a671bfc",
+      "name": "Extract transcript1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ac8c72c4-0a48-4cfb-9e98-48f14b6a5b94",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1460,
+        -80
+      ],
+      "id": "d1e20e3f-1d7b-4c2f-8f01-33a2b7ffdb84",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Bạn là chuyên gia phân tích marketing, nhiệm vụ của bạn là đánh giá một quảng cáo video của đối thủ trên mạng xã hội dựa trên các thông tin sau:\n\n1. Transcript (lời thoại) của video:\n\"\"\"\n{{ $json.transcript }}\n\"\"\"\n\n2. Nội dung bài viết đi kèm (caption/post):\n\"\"\"\n{{ $('Edit Fields').item.json.text }}\n\"\"\"\n\n3. Call To Action (CTA) của bài viết:\n\"\"\"\n{{ $('Edit Fields').item.json.ctaType }}\n\"\"\"\n\n---\n\nHãy phân tích chi tiết quảng cáo này theo các điểm sau:\n\n- Thông điệp chính và cách truyền tải thông điệp trong video và bài viết.\n- Điểm mạnh nổi bật giúp quảng cáo thu hút được khách hàng.\n- Các điểm yếu hoặc hạn chế trong nội dung hoặc cách trình bày.\n- Mức độ thuyết phục và khả năng kêu gọi hành động của CTA.\n- So sánh ngắn gọn với tiêu chuẩn quảng cáo hiệu quả trong ngành (Beauty Salon, Spa, v.v.).\n- Đề xuất chiến lược hoặc cải tiến nếu bạn là người làm marketing cho thương hiệu này.\n- Đánh giá tổng thể hiệu quả quảng cáo trên thang điểm 1-10.\n\n---\n\nXin trả lời một cách khách quan, chi tiết, có dẫn chứng cụ thể từ nội dung để tôi có thể hiểu rõ cách đối thủ vận hành quảng cáo của họ.\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        1980,
+        -80
+      ],
+      "id": "a41ea93b-2a1f-461b-b32a-5a71fc4dc462",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1980,
+        -200
+      ],
+      "id": "8dcf0292-d53d-4492-9cd6-06f96ae04210",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "GrP9LVTieDUj0VL9",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "30334e35-a07b-44b3-aee8-7ec45becd20e",
+              "name": "startDate",
+              "value": "={{ $json.startDate }}",
+              "type": "string"
+            },
+            {
+              "id": "40fd9772-da64-4a9a-8d02-63bc5e61aa14",
+              "name": "endDate",
+              "value": "={{ $json.endDate }}",
+              "type": "string"
+            },
+            {
+              "id": "688fa914-1db1-4792-8c27-3229b257021b",
+              "name": "videoUrls",
+              "value": "={{ $json.videoUrls }}",
+              "type": "string"
+            },
+            {
+              "id": "4a5e899c-e264-4cf2-9eac-51abd0aa56d3",
+              "name": "imageUrls",
+              "value": "={{ $json.imageUrls }}",
+              "type": "string"
+            },
+            {
+              "id": "0f161553-c425-4c03-99c0-9398bacd5d50",
+              "name": "ctaType",
+              "value": "={{ $json.ctaType }}",
+              "type": "string"
+            },
+            {
+              "id": "22a3ed5e-6626-42e4-9f13-ba298b9a8cc5",
+              "name": "displayformat",
+              "value": "={{ $json.displayformat }}",
+              "type": "string"
+            },
+            {
+              "id": "9553955d-961e-4b67-8310-231bd904e327",
+              "name": "text",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "e3e31fac-9e6f-4c00-b5dc-a608681707dd",
+              "name": "adArchiveID",
+              "value": "={{ $json.adArchiveID }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        620,
+        -80
+      ],
+      "id": "6100fc14-e9d0-4a03-ba21-8d144b3958b6",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1s80OGxCaNIrC8fRzCMfrzr4YssrKD_YROY65FhA8bOA",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 250687204,
+          "mode": "list",
+          "cachedResultName": "DATA PHÂN TÍCH",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1s80OGxCaNIrC8fRzCMfrzr4YssrKD_YROY65FhA8bOA/edit#gid=250687204"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "startDate": "={{ $json.startDate }}",
+            "endDate": "={{ $json.endDate }}",
+            "imageUrls": "={{ $json.imageUrls }}",
+            "videoUrls": "={{ $json.videoUrls }}",
+            "displayformat": "={{ $json.displayformat }}",
+            "text": "={{ $json.text }}",
+            "phân tích": "={{ $json.output }}",
+            "Transcript": "={{ $json.Transcript }}",
+            "adArchiveID": "={{ $json.adArchiveID }}"
+          },
+          "matchingColumns": [
+            "adArchiveID"
+          ],
+          "schema": [
+            {
+              "id": "startDate",
+              "displayName": "startDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "adArchiveID",
+              "displayName": "adArchiveID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "endDate",
+              "displayName": "endDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "displayformat",
+              "displayName": "displayformat",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "imageUrls",
+              "displayName": "imageUrls",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "videoUrls",
+              "displayName": "videoUrls",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "text",
+              "displayName": "text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Transcript",
+              "displayName": "Transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phân tích",
+              "displayName": "phân tích",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        2720,
+        -340
+      ],
+      "id": "a4246ca3-a0f3-468f-bcd9-0b0d65fcd74d",
+      "name": "Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "J0J1yWqJT32XRxHE",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "30334e35-a07b-44b3-aee8-7ec45becd20e",
+              "name": "startDate",
+              "value": "={{ $json.startDate }}",
+              "type": "string"
+            },
+            {
+              "id": "40fd9772-da64-4a9a-8d02-63bc5e61aa14",
+              "name": "endDate",
+              "value": "={{ $json.endDate }}",
+              "type": "string"
+            },
+            {
+              "id": "688fa914-1db1-4792-8c27-3229b257021b",
+              "name": "videoUrls",
+              "value": "={{ $json.videoUrls }}",
+              "type": "string"
+            },
+            {
+              "id": "4a5e899c-e264-4cf2-9eac-51abd0aa56d3",
+              "name": "imageUrls",
+              "value": "={{ $json.imageUrls }}",
+              "type": "string"
+            },
+            {
+              "id": "0f161553-c425-4c03-99c0-9398bacd5d50",
+              "name": "ctaType",
+              "value": "={{ $json.ctaType }}",
+              "type": "string"
+            },
+            {
+              "id": "22a3ed5e-6626-42e4-9f13-ba298b9a8cc5",
+              "name": "displayformat",
+              "value": "={{ $json.displayformat }}",
+              "type": "string"
+            },
+            {
+              "id": "9553955d-961e-4b67-8310-231bd904e327",
+              "name": "text",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "e3e31fac-9e6f-4c00-b5dc-a608681707dd",
+              "name": "adArchiveID",
+              "value": "={{ $json.adArchiveID }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        640,
+        -340
+      ],
+      "id": "c519c7ab-38cf-4449-836a-0532e966cbcf",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const imageUrls = item.json.imageUrls;\n\n  // Tách chuỗi thành mảng dựa theo dấu chấm phẩy, đồng thời loại bỏ khoảng trắng dư\n  const urls = imageUrls.split(';').map(url => url.trim()).filter(url => url !== '');\n\n  return {\n    json: {\n      ...item.json,\n      imageUrlsArray: urls, // mảng các URL\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        840,
+        -340
+      ],
+      "id": "9bd2c70d-88ce-4d02-866d-c4b52b4cd7b2",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "imageUrlsArray",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        -340
+      ],
+      "id": "cf12eb45-51a3-46a0-9ab0-1a6d79f516e6",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "text": "=Mô tả về hình ảnh\n",
+        "imageUrls": "={{ $json.imageUrlsArray }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1240,
+        -340
+      ],
+      "id": "a51e9e34-7702-45c4-af37-97374438db31",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "GrP9LVTieDUj0VL9",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "content"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1460,
+        -340
+      ],
+      "id": "0697ecb0-baf5-485a-a1c6-3db3f37e4bf5",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Bạn là một chuyên gia marketing. Hãy phân tích một quảng cáo đối thủ dựa trên các yếu tố sau:\n\n1. **Mô tả hình ảnh**: Đây là mô tả chi tiết về hình ảnh quảng cáo:  \n{{ $json.content }}\nHãy đánh giá mức độ thu hút, ý nghĩa hình ảnh và cảm xúc hình ảnh này tạo ra.\n\n2. **Nội dung bài viết**:  \n{{ $('Edit Fields1').item.json.text }}\nPhân tích thông điệp, độ rõ ràng, khả năng gây chú ý và thuyết phục.\n\n3. **CTA (Call to Action)**: Loại CTA được sử dụng là \"{{ $('Edit Fields1').item.json.ctaType }}\". Đánh giá sự phù hợp và khả năng thúc đẩy hành động.\n\n4. **Đối tượng mục tiêu**: Dự đoán đối tượng quảng cáo này nhắm tới.\n\n5. **Tổng thể quảng cáo**: Quảng cáo này có hiệu quả không? Vì sao? Có điểm nào nên cải thiện?\n\nHãy phân tích chi tiết, súc tích và mang tính chiến lược.\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        1980,
+        -340
+      ],
+      "id": "e652ad1e-b020-4b80-bb17-082f8e021cbe",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bb1c0bd0-13a1-4c52-9ea8-a68e69d4fc35",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "f617adc8-fe0c-492f-87ed-137fb7834029",
+              "name": "Transcript",
+              "value": "={{ $('Aggregate').item.json.content }}",
+              "type": "string"
+            },
+            {
+              "id": "e3a12330-8303-4323-a94e-ea5aa2f12675",
+              "name": "ctaType",
+              "value": "={{ $('Edit Fields1').item.json.ctaType }}",
+              "type": "string"
+            },
+            {
+              "id": "acf1e7d5-67e0-4731-adc7-dd822f53ab20",
+              "name": "displayformat",
+              "value": "={{ $('Edit Fields1').item.json.displayformat }}",
+              "type": "string"
+            },
+            {
+              "id": "609bc1ea-8c57-498f-bcfb-cd65b4561044",
+              "name": "text",
+              "value": "={{ $('Edit Fields1').item.json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "3c88d69a-4a38-4dac-9597-6401a2b3598f",
+              "name": "adArchiveID",
+              "value": "={{ $('Edit Fields1').item.json.adArchiveID }}",
+              "type": "string"
+            },
+            {
+              "id": "cef424ca-7038-4167-b9eb-007ef0f5bcdc",
+              "name": "endDate",
+              "value": "={{ $('Edit Fields1').item.json.endDate }}",
+              "type": "string"
+            },
+            {
+              "id": "709aed94-e943-4774-b71b-42da3ea4becc",
+              "name": "videoUrls",
+              "value": "={{ $('Edit Fields1').item.json.videoUrls }}",
+              "type": "string"
+            },
+            {
+              "id": "bbab6403-47e6-4491-90f2-4fd324de6de1",
+              "name": "imageUrls",
+              "value": "={{ $('Edit Fields1').item.json.imageUrls }}",
+              "type": "string"
+            },
+            {
+              "id": "c9374da4-637a-4745-b053-486b226cde8b",
+              "name": "startDate",
+              "value": "={{ $('Edit Fields1').item.json.startDate }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2340,
+        -340
+      ],
+      "id": "dcd6ad9a-5889-469f-85e9-dd83b87c675c",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bb1c0bd0-13a1-4c52-9ea8-a68e69d4fc35",
+              "name": "output",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "f617adc8-fe0c-492f-87ed-137fb7834029",
+              "name": "Transcript",
+              "value": "={{ $('Extract transcript1').item.json.transcript }}",
+              "type": "string"
+            },
+            {
+              "id": "e3a12330-8303-4323-a94e-ea5aa2f12675",
+              "name": "ctaType",
+              "value": "={{ $('Edit Fields').item.json.ctaType }}",
+              "type": "string"
+            },
+            {
+              "id": "acf1e7d5-67e0-4731-adc7-dd822f53ab20",
+              "name": "displayformat",
+              "value": "={{ $('Edit Fields').item.json.displayformat }}",
+              "type": "string"
+            },
+            {
+              "id": "609bc1ea-8c57-498f-bcfb-cd65b4561044",
+              "name": "text",
+              "value": "={{ $('Edit Fields').item.json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "3c88d69a-4a38-4dac-9597-6401a2b3598f",
+              "name": "adArchiveID",
+              "value": "={{ $('Edit Fields').item.json.adArchiveID }}",
+              "type": "string"
+            },
+            {
+              "id": "cef424ca-7038-4167-b9eb-007ef0f5bcdc",
+              "name": "endDate",
+              "value": "={{ $('Edit Fields').item.json.endDate }}",
+              "type": "string"
+            },
+            {
+              "id": "709aed94-e943-4774-b71b-42da3ea4becc",
+              "name": "videoUrls",
+              "value": "={{ $('Edit Fields').item.json.videoUrls }}",
+              "type": "string"
+            },
+            {
+              "id": "bbab6403-47e6-4491-90f2-4fd324de6de1",
+              "name": "imageUrls",
+              "value": "={{ $('Edit Fields').item.json.imageUrls }}",
+              "type": "string"
+            },
+            {
+              "id": "c9374da4-637a-4745-b053-486b226cde8b",
+              "name": "startDate",
+              "value": "={{ $('Edit Fields').item.json.startDate }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2340,
+        -80
+      ],
+      "id": "4bcc41fa-0030-4fb2-ac3c-bf7dda68577d",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        2520,
+        -220
+      ],
+      "id": "1047c04b-cba5-4751-b3bb-bd81b255fa59",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "output"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        2740,
+        -80
+      ],
+      "id": "2826489b-dd04-4b88-9b19-c8c0fe187daf",
+      "name": "Aggregate1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Bạn là một chuyên gia marketing. Dưới đây là các phân tích chi tiết về từng quảng cáo trong một chiến dịch quảng cáo của một fanpage thẩm mỹ/spa đối thủ.\n\nHãy đánh giá tổng thể chiến dịch quảng cáo của fanpage này dựa trên tất cả các bài quảng cáo được cung cấp:\n\n=== TỔNG HỢP PHÂN TÍCH CÁC QUẢNG CÁO ===\n{{ $json.output }}\n=== END ===\n\nHãy trả lời các điểm sau:\n1. Các thông điệp chính trong toàn bộ chiến dịch là gì?\n2. Phong cách thể hiện xuyên suốt là gì? (giọng điệu, cảm xúc, hình ảnh)\n3. Mức độ nhất quán giữa các quảng cáo\n4. Đối tượng khách hàng mà toàn bộ chiến dịch đang nhắm tới là ai?\n5. Chiến dịch này có điểm mạnh, điểm yếu gì nếu nhìn toàn cục?\n6. Đánh giá hiệu quả chiến dịch này trên thang điểm 1–10\n7. Nếu là người làm marketing cho đối thủ, bạn sẽ phản công chiến dịch này bằng cách nào?\n\nHãy phân tích chi tiết, sắc sảo, mang tính chiến lược.\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        2960,
+        -80
+      ],
+      "id": "34425ff7-b95e-42de-836f-fbe6e21e5a9f",
+      "name": "Basic LLM Chain1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2840,
+        120
+      ],
+      "id": "4b0c4374-9e8b-471d-830c-494dc27299d3",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "GrP9LVTieDUj0VL9",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1s80OGxCaNIrC8fRzCMfrzr4YssrKD_YROY65FhA8bOA",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2116389451,
+          "mode": "list",
+          "cachedResultName": "Phân tích tổng thể",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1s80OGxCaNIrC8fRzCMfrzr4YssrKD_YROY65FhA8bOA/edit#gid=2116389451"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "page_ID": "={{ $('On form submission').item.json.page_id }}",
+            "Phân tích": "={{ $json.text }}"
+          },
+          "matchingColumns": [
+            "page_ID"
+          ],
+          "schema": [
+            {
+              "id": "page_ID",
+              "displayName": "page_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phân tích",
+              "displayName": "Phân tích",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        3340,
+        -80
+      ],
+      "id": "81f72c8b-ee10-49d6-9f23-779e9976ccf4",
+      "name": "Google Sheets2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "J0J1yWqJT32XRxHE",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 360,
+        "width": 1100
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        780,
+        -160
+      ],
+      "id": "c452a3ff-5cd6-411e-a24b-c1782a0c4bf8",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/apify~facebook-posts-scraper/run-sync-get-dataset-items?token=apify_api_lHBtlRljggXZjCgPMKuxhumIMMdTBB0jD7RT",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"captionText\": false,\n  \"resultsLimit\": 20,\n  \"startUrls\": [\n    {\n      \"url\": \"https://www.facebook.com/vienthammydiva.vn/\",\n      \"method\": \"GET\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        560
+      ],
+      "id": "9030b83e-3fe4-4710-9b94-d45694348bfd",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const ads = $('Loop Over Items').all(); // Dữ liệu từ node HTTP Request (quảng cáo)\nconst posts = $input.all(); // Dữ liệu từ node mới (bài viết)\n\nreturn posts.map(post => {\n  const postText = post.json.text || '';\n  const matchedAd = ads.find(ad => ad.json.snapshot.body.text === postText);\n  if (matchedAd) {\n    return {\n      json: {\n        post_id: post.json.postId,\n        adArchiveID: matchedAd.json.adArchiveID,\n        text: postText\n      }\n    };\n  }\n  return null;\n}).filter(item => item !== null);"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        560
+      ],
+      "id": "265b2afa-984d-4836-8bf2-a37d9b347254",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/apify~facebook-comments-scraper/run-sync-get-dataset-items?token=apify_api_lHBtlRljggXZjCgPMKuxhumIMMdTBB0jD7RT",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"includeNestedComments\": false,\n    \"resultsLimit\": 5,\n    \"startUrls\": [\n        {\n            \"url\": \"https://www.facebook.com/{{ $json.post_id }}\",\n            \"method\": \"GET\"\n        }\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        740,
+        560
+      ],
+      "id": "98488585-87c5-4d04-a91e-6c819c8a5f9b",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        260,
+        360
+      ],
+      "id": "7cccb0f1-a28a-4327-b1cf-1eb865268768",
+      "name": "Aggregate2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        20,
+        360
+      ],
+      "id": "2dcffa0b-0f64-4a57-9dfd-6a49409979ab",
+      "name": "Loop Over Items"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to AssemblyAI1": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Check transcript status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check transcript status1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Extract transcript1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract transcript1": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send to AssemblyAI1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Aggregate1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate1": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Aggregate2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "96214c5d-7736-450c-858f-6b7fb52f5cf6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6f94031800cf360cd73490963c40a8c478af67d036a3a8ff2506f42f04cabe94"
+  },
+  "id": "XeDEHGIMuhsDzO8w",
+  "tags": []
+}
