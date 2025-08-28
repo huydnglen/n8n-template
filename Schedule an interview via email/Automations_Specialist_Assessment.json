@@ -1,0 +1,1929 @@
+{
+  "name": "flow_pilot",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2080,
+        -768
+      ],
+      "id": "8f6482f7-bb1e-4379-b41f-8fc20752518b",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "OQ7uPFeQm3JPxpQ3",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://gmail.googleapis.com/gmail/v1/users/me/labels",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "gmailOAuth2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -80,
+        -496
+      ],
+      "id": "e6fac535-42be-4c33-ba1e-a78080e7cc5b",
+      "name": "Get Gmail Labels List",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Yi7JkiLSbV1jYrtz",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0ccb9135-3227-4ccc-8365-8ccfc9c87706",
+              "name": "Label_1",
+              "value": "Initial interview",
+              "type": "string"
+            },
+            {
+              "id": "fce09ea6-2ad9-4654-9f0f-54b85804fcbe",
+              "name": "Label_2",
+              "value": "Final interview",
+              "type": "string"
+            },
+            {
+              "id": "968cd279-a639-45a3-aa41-fa3971e67e84",
+              "name": "label_3",
+              "value": "Negative",
+              "type": "string"
+            },
+            {
+              "id": "dab9f23c-d178-4dab-8bfa-0533f52563f5",
+              "name": "link_jotform",
+              "value": "https://form.jotform.com/252215412684453",
+              "type": "string"
+            },
+            {
+              "id": "a55fcfff-93a0-4c8f-a241-9b2ea02b7760",
+              "name": "link_booking",
+              "value": "https://calendar.app.google/qh2sTjv7ShAeZZCdA",
+              "type": "string"
+            },
+            {
+              "id": "a00ca548-d455-4bd5-82ce-33f8ed0c5445",
+              "name": "assessment_link",
+              "value": "https://docs.google.com/document/d/1Bk9HhEXXPUvMxHFWtMx801gjedoIChz8Z4rEwa_wZMc",
+              "type": "string"
+            },
+            {
+              "id": "54d54932-6257-4bcf-bd1c-29bdf004ceef",
+              "name": "id_google sheet",
+              "value": "1MlUaUNBy6YaWdBbi87Co1QDkBQ-hHm7g19G3_g8vDRQ",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        112,
+        -496
+      ],
+      "id": "02277e1c-9218-4de5-a340-0111067149d4",
+      "name": "Set Interview Config (Labels & Links)"
+    },
+    {
+      "parameters": {
+        "url": "=https://gmail.googleapis.com/gmail/v1/users/me/messages?q=label:(\"{{ $json.Label_1 }}\" OR \"{{ $json.Label_2 }}\" OR \"{{ $json.label_3 }}\") newer_than:30m",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "gmailOAuth2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        288,
+        -496
+      ],
+      "id": "c4683055-82be-4d38-be05-1226a09f403b",
+      "name": "Search Interview Emails (Last 30 mins)",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Yi7JkiLSbV1jYrtz",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "messages",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        464,
+        -496
+      ],
+      "id": "8e30efb3-e126-4c4f-845e-5611feee7058",
+      "name": "Split Email List"
+    },
+    {
+      "parameters": {
+        "url": "=https://gmail.googleapis.com/gmail/v1/users/me/messages/{{ $json.id }}?format=full",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "gmailOAuth2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        656,
+        -496
+      ],
+      "id": "08b4c1ae-36fa-4a61-9b4d-fe7ef8c9878a",
+      "name": "Get Email Content (Gmail API)",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Yi7JkiLSbV1jYrtz",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Lấy mapping labelId -> labelName từ Get Labels\nconst labelsList = $items(\"Get Gmail Labels List\")[0].json.labels || [];\nconst labelMap = {};\nlabelsList.forEach(l => labelMap[l.id] = l.name);\n\n// 2. Lấy danh sách labelName hợp lệ từ Edit Fields\nconst allowedObj = $items(\"Set Interview Config (Labels & Links)\")[0].json;\nconst allowedNames = Object.values(allowedObj);\n\n// 3. Xử lý từng email từ HTTP Request1\nreturn $input.all().map(item => {\n  const emailData = item.json;\n\n  // Lọc label hợp lệ\n  const matchedLabels = (emailData.labelIds || [])\n    .map(id => labelMap[id] || id)\n    .filter(name => allowedNames.includes(name));\n\n  return {\n    json: {\n      ...emailData,\n      matchedLabels\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        -496
+      ],
+      "id": "1057cd74-2eb0-4166-a0e8-01a3d34d71b7",
+      "name": "Map & Match Email Labels"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.matchedLabels[0] }}",
+                    "rightValue": "={{ $('Set Interview Config (Labels & Links)').item.json.Label_1 }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "88cf811f-f36d-4736-92de-aa465c9212bc"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Initial interview"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ad8931e6-6ef2-481e-a1da-7720d0b212d0",
+                    "leftValue": "={{ $json.matchedLabels[0] }}",
+                    "rightValue": "={{ $('Set Interview Config (Labels & Links)').item.json.Label_2 }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "\nFinal interview"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "3e4f5154-41f5-4c64-b444-92f4984be80e",
+                    "leftValue": "={{ $json.matchedLabels[0] }}",
+                    "rightValue": "={{ $('Set Interview Config (Labels & Links)').item.json.label_3 }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Negative"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1056,
+        -512
+      ],
+      "id": "33ca138e-8484-419c-b515-100f550e3a8c",
+      "name": "Route by Interview Type"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a concise, polite email in English to thank the candidate for joining the initial interview.  \nCandidate name: {{ $('ExtractSenderEmail1').item.json.senderName }}\nMy company name: Flow Pilot\nSignature: \"Russel Praga\nProject Manager\nFlow Pilot AI Automation\"\nInclude these links without modifying them:  \nJotForm: {{ $('Set Interview Config (Labels & Links)').item.json.link_jotform }}  \nGoogle Calendar booking: {{ $('Set Interview Config (Labels & Links)').item.json.link_booking }}.  \nTone: professional and friendly\nNote:  do not need to Subject\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        1888,
+        -1008
+      ],
+      "id": "e2f175aa-0171-43a1-b4cc-62691d468527",
+      "name": "Generate Candidate Reply Email"
+    },
+    {
+      "parameters": {
+        "jsCode": "const to = $('ExtractSenderEmail1').first().json.senderEmail;\nconst subject = \"Initial Interview by Flow Pilot\";\nconst body = $input.first().json.text;\n\nconst emailRaw = \n`To: ${to}\nSubject: ${subject}\n\n${body}`;\n\nlet base64EncodedEmail = Buffer.from(emailRaw)\n  .toString(\"base64\")\n  .replace(/\\+/g, '-')\n  .replace(/\\//g, '_')\n  .replace(/=+$/, '');\n\nreturn [{ json: { raw: base64EncodedEmail } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2272,
+        -1008
+      ],
+      "id": "332116b1-fc80-4d66-98fc-3fda533f8cbf",
+      "name": "Format Email for Gmail API"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "gmailOAuth2",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "raw",
+              "value": "={{ $json.raw }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2464,
+        -1008
+      ],
+      "id": "173c4e40-56e7-4845-b6c1-5b744fb7ff22",
+      "name": "Send Candidate Email (Gmail API)",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Yi7JkiLSbV1jYrtz",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "951e99a1-d8c2-4b10-a347-4bce268c6287",
+              "name": "id_googlesheet",
+              "value": "1MlUaUNBy6YaWdBbi87Co1QDkBQ-hHm7g19G3_g8vDRQ",
+              "type": "string"
+            },
+            {
+              "id": "5e40248b-327e-4c54-8599-27bfad21ac46",
+              "name": "discord_webhook",
+              "value": "https://discord.com/api/webhooks/1404523518988783737/BulKMRv8thA7xvwGUvguqtyjvRaPa4WbrnG17bOLw0JJs4QcaURAWNXuhO-LWbmc8O0t",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1536,
+        -1200
+      ],
+      "id": "f3f3211d-a638-49b1-b699-6018a97be3ac",
+      "name": "Set Google Sheet & Discord Config"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $json.id_googlesheet }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Initial Interview",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MlUaUNBy6YaWdBbi87Co1QDkBQ-hHm7g19G3_g8vDRQ/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1712,
+        -1200
+      ],
+      "id": "f7878c4d-55d3-4c6d-993d-26d73b81d710",
+      "name": "Get Candidate Emails (Google Sheets)",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GPb8CLBQ6D5yAphG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleCalendarOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1888,
+        -1200
+      ],
+      "id": "7b0b3591-eea0-4e85-99a9-3196f4c6e7a9",
+      "name": "Get Google Calendar Events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "fjexUdaDx8jNGwBW",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lấy mảng event từ dữ liệu đầu vào (giữ nguyên format bạn đang dùng)\nconst events = $json[\"items\"] || [];\n\n// Thời điểm hiện tại\nconst now = new Date();\n\n// Lấy tất cả dòng từ node Google Sheet \"get email list\"\nconst sheetItems = $items(\"Get Candidate Emails (Google Sheets)\") || [];\n\n// Tạo set email (cắt nhiều email trong 1 ô nếu cần)\nconst emailSet = new Set(\n  sheetItems.flatMap(item => {\n    const cell = (item.json[\"Candidate Email\"] || \"\").toString();\n    if (!cell) return [];\n    // split on comma, semicolon, hoặc newline\n    return cell.split(/[,;\\n]+/).map(s => s.trim().toLowerCase()).filter(Boolean);\n  })\n);\n\n// Hàm kiểm tra: có attendee \"accepted\" mà không phải organizer/self và không có trong sheet\nfunction hasAcceptedNonSheetAttendee(attendees, organizerEmail) {\n  if (!Array.isArray(attendees)) return false;\n  return attendees.some(att => {\n    if (!att || !att.email) return false;\n    const email = att.email.toLowerCase();\n\n    // Bỏ qua organizer/self\n    if (att.organizer === true || att.self === true) return false;\n    // Bỏ qua nếu trùng email với organizer\n    if (organizerEmail && email === organizerEmail) return false;\n\n    // Chỉ lấy nếu đã accepted\n    const status = (att.responseStatus || \"\").toLowerCase();\n    if (status !== \"accepted\") return false;\n\n    // Nếu email không nằm trong sheet => thỏa điều kiện\n    return !emailSet.has(email);\n  });\n}\n\n// Lọc event theo điều kiện đã mô tả\nconst filtered = events.filter(ev => {\n  if (!ev.summary || !ev.end?.dateTime) return false;\n  if (!ev.summary.toLowerCase().includes(\"initial interview\")) return false;\n  if (new Date(ev.end.dateTime) <= now) return false;\n\n  const organizerEmail = ev.organizer?.email?.toLowerCase() || null;\n  return hasAcceptedNonSheetAttendee(ev.attendees, organizerEmail);\n});\n\n// Trả về items cho n8n, đồng thời lọc attendees bỏ organizer\nreturn filtered.map(ev => {\n  const organizerEmail = ev.organizer?.email?.toLowerCase() || null;\n  const attendeesWithoutOrganizer = (ev.attendees || []).filter(\n    a => a.email?.toLowerCase() !== organizerEmail\n  );\n  return {\n    json: {\n      ...ev,\n      attendees: attendeesWithoutOrganizer\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2080,
+        -1200
+      ],
+      "id": "59946d8a-2414-48be-80cd-0c35693d58d7",
+      "name": "Filter Events & Remove Organizer from Attendees"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/primary/events?conferenceDataVersion=1&sendUpdates=all",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleCalendarOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"summary\": \"{{ $json.summary }}\",\n  \"description\": \"Interview with candidate\",\n  \"start\": {\n    \"dateTime\": \"{{ $json.start.dateTime }}\",\n    \"timeZone\": \"Asia/Ho_Chi_Minh\"\n  },\n  \"end\": {\n    \"dateTime\": \"{{ $json.end.dateTime }}\",\n    \"timeZone\": \"Asia/Ho_Chi_Minh\"\n  },\n  \"attendees\": [\n    { \"email\": \"{{ $json.attendees[0].email }}\" }\n  ],\n  \"conferenceData\": {\n    \"createRequest\": {\n      \"requestId\": \"meet_\" \n    }\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2288,
+        -1200
+      ],
+      "id": "1900cd80-fbfa-40b4-8506-9e247a56f6b7",
+      "name": "Create Calendar Event with Meet Link",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "fjexUdaDx8jNGwBW",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Set Google Sheet & Discord Config').item.json.id_googlesheet }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Initial Interview",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MlUaUNBy6YaWdBbi87Co1QDkBQ-hHm7g19G3_g8vDRQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Candidate Email": "={{ $json.attendees[0].email }}",
+            "Status": "={{ $json.status }}",
+            "Google Meet Link": "={{ $json.hangoutLink }}",
+            "Interview End Time": "={{ $json.end.dateTime }}",
+            "Interview Start Time": "={{ $json.start.dateTime }}"
+          },
+          "matchingColumns": [
+            "Candidate Email"
+          ],
+          "schema": [
+            {
+              "id": "Candidate Email",
+              "displayName": "Candidate Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Interview Start Time",
+              "displayName": "Interview Start Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Interview End Time",
+              "displayName": "Interview End Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Google Meet Link",
+              "displayName": "Google Meet Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        2480,
+        -1200
+      ],
+      "id": "27397b72-18ac-4828-9c41-9ca49b0cfe72",
+      "name": "Save Event Info to Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GPb8CLBQ6D5yAphG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a short, clear notification for the interviewer about the candidate’s scheduled appointment.\nInclude:\n\nCandidate Email: {{ $json['Candidate Email'] }}\n\nGoogle Meet Link: {{ $json['Google Meet Link'] }}\n\nTime: {{ $json['Interview Start Time'] }} – {{ $json['Interview End Time'] }}\nReturn only the message text.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        2640,
+        -1200
+      ],
+      "id": "12a0a6c9-33f4-4f7d-bdd9-d649192398ec",
+      "name": "Generate Interview Notification Message"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Google Sheet & Discord Config').item.json.discord_webhook }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2976,
+        -1200
+      ],
+      "id": "701779e9-4c6d-4c89-9d1b-392bf51ee9ef",
+      "name": "Send Notification to Discord"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        1360,
+        -1200
+      ],
+      "id": "9c368e19-87e8-4014-8586-4104f3e1ba92",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "content": "Initial Interview",
+        "height": 608,
+        "width": 1968
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        -1264
+      ],
+      "id": "e85c8b54-4720-4916-80fe-55e9f6453bbb",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $json['id_google sheet'] }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Initial Interview",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MlUaUNBy6YaWdBbi87Co1QDkBQ-hHm7g19G3_g8vDRQ/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Candidate Email",
+              "lookupValue": "={{ $('ExtractEmailMetadata').item.json.senderEmail }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1728,
+        -496
+      ],
+      "id": "cadd3cfa-beee-4580-ab0e-90de14b390aa",
+      "name": "Get Initial Interview Infomation",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GPb8CLBQ6D5yAphG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const to = $('FilterNonFinalInterviewEmails').first().json.email;\nconst subject = \"One Step Closer! Flow Pilot Automations Specialist Talent Assessment\";\nconst body = $('Generate message confirming final round').first().json.text;\n\nconst emailRaw = \n`To: ${to}\nSubject: ${subject}\n\n${body}`;\n\nlet base64EncodedEmail = Buffer.from(emailRaw)\n  .toString(\"base64\")\n  .replace(/\\+/g, '-')\n  .replace(/\\//g, '_')\n  .replace(/=+$/, '');\n\nreturn [{ json: { raw: base64EncodedEmail } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2624,
+        -496
+      ],
+      "id": "4dec48c8-446e-4b1d-876a-72ca2e5af7f5",
+      "name": "Format Email for Gmail API(1)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "gmailOAuth2",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "raw",
+              "value": "={{ $json.raw }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2832,
+        -496
+      ],
+      "id": "940780d9-4c30-45a6-a472-71288533bfc3",
+      "name": "Send Candidate Email (Gmail API) (1)",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Yi7JkiLSbV1jYrtz",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/primary/events?conferenceDataVersion=1&sendUpdates=all",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleCalendarOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"summary\": \"Final Interview\",\n  \"description\": \"Interview with candidate\",\n  \"start\": {\n    \"dateTime\": \"{{ $('ExtractEmailMetadata').item.json.plus4Days }}\",\n    \"timeZone\": \"Asia/Ho_Chi_Minh\"\n  },\n  \"end\": {\n    \"dateTime\": \"{{ $('ExtractEmailMetadata').item.json.plus4Days1Hour }}\",\n    \"timeZone\": \"Asia/Ho_Chi_Minh\"\n  },\n  \"attendees\": [\n    { \"email\": \"{{ $('FilterNonFinalInterviewEmails').item.json.email }}\" },\n    { \"email\": \"{{ $('Set discord_webhook and Final Interviewer').item.json.final_interviewer }}\" }\n  ],\n  \"conferenceData\": {\n    \"createRequest\": {\n      \"requestId\": \"meet_\" \n    }\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3024,
+        -496
+      ],
+      "id": "da28eda5-46b6-499d-807e-0bdc3fe8a519",
+      "name": "Create Calendar Event with Meet Link1",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "fjexUdaDx8jNGwBW",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Set discord_webhook and Final Interviewer').item.json['id_google sheet'] }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1195944247,
+          "mode": "list",
+          "cachedResultName": "Final Interview",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MlUaUNBy6YaWdBbi87Co1QDkBQ-hHm7g19G3_g8vDRQ/edit#gid=1195944247"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Candidate Email": "={{ $('ExtractEmailMetadata').item.json.senderEmail }}",
+            "Interview Start Time": "={{ $('ExtractEmailMetadata').item.json.plus4Days }}",
+            "Interview End Time": "={{ $('ExtractEmailMetadata').item.json.plus4Days1Hour }}",
+            "Google Meet Link": "={{ $json.hangoutLink }}",
+            "Interviewer": "={{ $('Set discord_webhook and Final Interviewer').item.json.final_interviewer }}"
+          },
+          "matchingColumns": [
+            "Candidate Email"
+          ],
+          "schema": [
+            {
+              "id": "Candidate Email",
+              "displayName": "Candidate Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Interview Start Time",
+              "displayName": "Interview Start Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Interview End Time",
+              "displayName": "Interview End Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Google Meet Link",
+              "displayName": "Google Meet Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Interviewer",
+              "displayName": "Interviewer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Notes ",
+              "displayName": "Notes ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Result ",
+              "displayName": "Result ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Feedback ",
+              "displayName": "Feedback ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        3232,
+        -496
+      ],
+      "id": "d559b821-f928-4b4c-b936-a519c82b737e",
+      "name": "Save Event Info to Google Sheets [Final Interview]",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GPb8CLBQ6D5yAphG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Generate a concise notification for the interviewer about a candidate’s scheduled interview using:\n\nCandidate Email: {{ $json['Candidate Email'] }}\n\nGoogle Meet Link: {{ $json['Google Meet Link'] }}\n\nTime: {{ $json['Interview Start Time'] }} – {{ $json['Interview End Time'] }}\n\nReturn only the message text.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        3408,
+        -496
+      ],
+      "id": "1aed76bd-0209-4ba2-8621-858ff64de433",
+      "name": "Generate Interview Notification Message1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set discord_webhook and Final Interviewer').item.json.final_discord_webhook }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3760,
+        -496
+      ],
+      "id": "004e49e6-ad07-4031-8e2d-a219fdc59c0f",
+      "name": "Send Notification to Discord1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Set discord_webhook and Final Interviewer').item.json['id_google sheet'] }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1195944247,
+          "mode": "list",
+          "cachedResultName": "Final Interview",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MlUaUNBy6YaWdBbi87Co1QDkBQ-hHm7g19G3_g8vDRQ/edit#gid=1195944247"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1904,
+        -496
+      ],
+      "id": "9df44545-cd8a-4e5c-ba42-d8cfa044b6d0",
+      "name": "Get final Interview Infomation",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GPb8CLBQ6D5yAphG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Final Interview",
+        "height": 352,
+        "width": 2688,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        -608
+      ],
+      "id": "fb366e1f-8932-49de-886d-93f36b3ae763",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a polite and professional job rejection email that leaves a positive impression on the candidate, expressing appreciation for their time and effort, and encouraging them to apply for future opportunities. Return only the email text.\n\nCandidate name: {{ $('ExtractSenderEmail').item.json.senderName }}\nMy company name: Flow Pilot\nSignature: \"Russel Praga\nProject Manager\nFlow Pilot AI Automation\"\nNote: do not need to subject",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        1920,
+        32
+      ],
+      "id": "2bb35d81-5100-41ec-b77a-a31d069426f2",
+      "name": "Basic LLM Chain1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        192
+      ],
+      "id": "a079ac8d-3af1-4059-b7f3-83e829543121",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "OQ7uPFeQm3JPxpQ3",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const to = $('Filter Negative Interview').first().json.email;\nconst subject = \"Regarding Your Application\";\nconst body = $('Basic LLM Chain1').first().json.text;\n\nconst emailRaw = \n`To: ${to}\nSubject: ${subject}\n\n${body}`;\n\nlet base64EncodedEmail = Buffer.from(emailRaw)\n  .toString(\"base64\")\n  .replace(/\\+/g, '-')\n  .replace(/\\//g, '_')\n  .replace(/=+$/, '');\n\nreturn [{ json: { raw: base64EncodedEmail } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2256,
+        32
+      ],
+      "id": "2bf12338-616e-4870-872e-68b09d4d668d",
+      "name": "Format Email for Gmail API(1)1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "gmailOAuth2",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "raw",
+              "value": "={{ $json.raw }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2432,
+        32
+      ],
+      "id": "7b3b5900-a7e8-43c7-993a-b6c75e648b86",
+      "name": "Send Candidate Email (Gmail API) (1)1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Yi7JkiLSbV1jYrtz",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Set Interview Config (Labels & Links)').item.json['id_google sheet'] }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1799802157,
+          "mode": "list",
+          "cachedResultName": "Negative",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MlUaUNBy6YaWdBbi87Co1QDkBQ-hHm7g19G3_g8vDRQ/edit#gid=1799802157"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Candidate Email": "={{ $('ExtractSenderEmail').item.json.senderEmail }}"
+          },
+          "matchingColumns": [
+            "Candidate Email"
+          ],
+          "schema": [
+            {
+              "id": "Candidate Email",
+              "displayName": "Candidate Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        2608,
+        32
+      ],
+      "id": "2a5d7bc0-a40d-4ba4-9902-94c8c2087c06",
+      "name": "Save Event Info to Google Sheets [Final Interview]1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GPb8CLBQ6D5yAphG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Set Interview Config (Labels & Links)').item.json['id_google sheet'] }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1799802157,
+          "mode": "list",
+          "cachedResultName": "Negative",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MlUaUNBy6YaWdBbi87Co1QDkBQ-hHm7g19G3_g8vDRQ/edit#gid=1799802157"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1536,
+        32
+      ],
+      "id": "63b4c8d2-d139-4a2f-9104-86df775ebc78",
+      "name": "Get final Interview Infomation1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GPb8CLBQ6D5yAphG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2752,
+        -256
+      ],
+      "id": "b60de440-59ed-4dec-b632-4110bff06157",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "OQ7uPFeQm3JPxpQ3",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Negative Interview",
+        "height": 416,
+        "width": 1504,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        -64
+      ],
+      "id": "de9ca9bf-9f70-41c2-9aa0-978b2d7288d5",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lấy dữ liệu từ JSON đầu vào\nconst data = $json;\n\n// Hàm lấy giá trị header\nfunction getHeaderValue(headers, name) {\n  const header = headers.find(h => h.name.toLowerCase() === name.toLowerCase());\n  return header ? header.value : null;\n}\n\nconst headers = data.payload?.headers || [];\n\n// Lấy thời gian gửi email\nconst sentDateStr = getHeaderValue(headers, \"Date\");\nconst sentDate = sentDateStr ? new Date(sentDateStr) : null;\n\n// Lấy header \"From\"\nconst fromHeader = getHeaderValue(headers, \"From\");\n\nlet senderName = null;\nlet senderEmail = null;\n\nif (fromHeader) {\n  // Regex lấy tên trong dấu ngoặc kép hoặc trước dấu <\n  // Nếu không có dấu ngoặc kép, lấy phần trước dấu < (nếu có)\n  const nameMatch = fromHeader.match(/\"([^\"]+)\"/);\n  if (nameMatch) {\n    senderName = nameMatch[1];\n  } else {\n    // Nếu không có dấu ngoặc kép, lấy phần trước dấu <\n    const nameBeforeEmailMatch = fromHeader.match(/^([^<\"]+)\\s*</);\n    senderName = nameBeforeEmailMatch ? nameBeforeEmailMatch[1].trim() : null;\n  }\n\n  // Regex lấy email trong <>\n  const emailMatch = fromHeader.match(/<([^>]+)>/);\n  senderEmail = emailMatch ? emailMatch[1] : fromHeader.trim();\n}\n\n// Tính cộng ngày/giờ\nlet plus4Days = null;\nlet plus4Days1Hour = null;\nif (sentDate) {\n  plus4Days = new Date(sentDate);\n  plus4Days.setDate(plus4Days.getDate() + 4);\n\n  plus4Days1Hour = new Date(plus4Days);\n  plus4Days1Hour.setHours(plus4Days1Hour.getHours() + 1);\n}\n\n// Trả kết quả\nreturn [\n  {\n    json: {\n      sentDate: sentDate ? sentDate.toISOString() : null,\n      senderName,\n      senderEmail,\n      plus4Days: plus4Days ? plus4Days.toISOString() : null,\n      plus4Days1Hour: plus4Days1Hour ? plus4Days1Hour.toISOString() : null\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        -496
+      ],
+      "id": "7e307acf-5435-4818-9f4c-05075b511770",
+      "name": "ExtractEmailMetadata"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Email cần kiểm tra từ node trước (ví dụ lấy từ field \"email\")\nconst emailToCheck = $('ExtractEmailMetadata').first().json.senderEmail?.toLowerCase() || \"\";\n\n// Lấy toàn bộ dữ liệu từ node Google Sheet \"Get Final Interview List\"\nconst sheetItems = $items(\"Get final Interview Infomation\") || [];\n\n// Tạo set các email Interviewer (chuyển về lowercase, trim khoảng trắng)\nconst interviewerSet = new Set(\n  sheetItems\n    .map(item => (item.json[\"Candidate Email\"] || \"\").toString().trim().toLowerCase())\n    .filter(Boolean)\n);\n\n// Nếu email KHÔNG có trong danh sách Interviewer thì trả ra\nif (!interviewerSet.has(emailToCheck)) {\n  return [{ json: { email: emailToCheck } }];\n}\n\n// Nếu email có trong danh sách thì không trả gì (n8n sẽ coi như dừng luồng)\nreturn [];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2080,
+        -496
+      ],
+      "id": "67e07904-fa04-45ee-aaeb-0e6cd1ff432c",
+      "name": "FilterNonFinalInterviewEmails"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lấy dữ liệu từ JSON đầu vào\nconst data = $json;\n\n// Hàm lấy giá trị header\nfunction getHeaderValue(headers, name) {\n  const header = headers.find(h => h.name.toLowerCase() === name.toLowerCase());\n  return header ? header.value : null;\n}\n\nconst headers = data.payload?.headers || [];\n\n// Lấy header \"From\"\nconst fromHeader = getHeaderValue(headers, \"From\");\n\nlet senderName = null;\nlet senderEmail = null;\n\nif (fromHeader) {\n  // Regex lấy tên trong dấu ngoặc kép hoặc trước dấu <\n  const nameMatch = fromHeader.match(/\"([^\"]+)\"/);\n  senderName = nameMatch ? nameMatch[1] : null;\n\n  // Regex lấy email trong <>\n  const emailMatch = fromHeader.match(/<([^>]+)>/);\n  senderEmail = emailMatch ? emailMatch[1] : fromHeader;\n}\n\n// Trả kết quả gồm senderName và senderEmail\nreturn [\n  {\n    json: {\n      senderName,\n      senderEmail\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        32
+      ],
+      "id": "73469086-8907-408d-807b-7046ea184ef3",
+      "name": "ExtractSenderEmail"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Email cần kiểm tra từ node trước (ví dụ lấy từ field \"email\")\nconst emailToCheck = $('ExtractSenderEmail').first().json.senderEmail?.toLowerCase() || \"\";\n\n// Lấy toàn bộ dữ liệu từ node Google Sheet \"Get Final Interview List\"\nconst sheetItems = $items(\"Get final Interview Infomation1\") || [];\n\n// Tạo set các email Interviewer (chuyển về lowercase, trim khoảng trắng)\nconst interviewerSet = new Set(\n  sheetItems\n    .map(item => (item.json[\"Candidate Email\"] || \"\").toString().trim().toLowerCase())\n    .filter(Boolean)\n);\n\n// Nếu email KHÔNG có trong danh sách Interviewer thì trả ra\nif (!interviewerSet.has(emailToCheck)) {\n  return [{ json: { email: emailToCheck } }];\n}\n\n// Nếu email có trong danh sách thì không trả gì (n8n sẽ coi như dừng luồng)\nreturn [];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1712,
+        32
+      ],
+      "id": "31160a90-73a0-4892-be1c-b07bef48ed2b",
+      "name": "Filter Negative Interview"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lấy dữ liệu từ JSON đầu vào\nconst data = $json;\n\n// Hàm lấy giá trị header\nfunction getHeaderValue(headers, name) {\n  const header = headers.find(h => h.name.toLowerCase() === name.toLowerCase());\n  return header ? header.value : null;\n}\n\nconst headers = data.payload?.headers || [];\n\n// Lấy header \"From\"\nconst fromHeader = getHeaderValue(headers, \"From\");\n\nlet senderName = null;\nlet senderEmail = null;\n\nif (fromHeader) {\n  // Regex lấy tên trong dấu ngoặc kép hoặc trước dấu <\n  const nameMatch = fromHeader.match(/\"([^\"]+)\"/);\n  senderName = nameMatch ? nameMatch[1] : null;\n\n  // Regex lấy email trong <>\n  const emailMatch = fromHeader.match(/<([^>]+)>/);\n  senderEmail = emailMatch ? emailMatch[1] : fromHeader;\n}\n\n// Trả kết quả gồm senderName và senderEmail\nreturn [\n  {\n    json: {\n      senderName,\n      senderEmail\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        -1008
+      ],
+      "id": "c8569250-277b-4ac2-8ee5-5926c3da196f",
+      "name": "ExtractSenderEmail1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Email cần kiểm tra từ node trước (ví dụ lấy từ field \"email\")\nconst emailToCheck = $('ExtractSenderEmail1').first().json.senderEmail?.toLowerCase() || \"\";\n\n// Lấy toàn bộ dữ liệu từ node Google Sheet \"Get Final Interview List\"\nconst sheetItems = $items(\"Get Reply Email\") || [];\n\n// Tạo set các email Interviewer (chuyển về lowercase, trim khoảng trắng)\nconst interviewerSet = new Set(\n  sheetItems\n    .map(item => (item.json[\"Candidate Email\"] || \"\").toString().trim().toLowerCase())\n    .filter(Boolean)\n);\n\n// Nếu email KHÔNG có trong danh sách Interviewer thì trả ra\nif (!interviewerSet.has(emailToCheck)) {\n  return [{ json: { email: emailToCheck } }];\n}\n\n// Nếu email có trong danh sách thì không trả gì (n8n sẽ coi như dừng luồng)\nreturn [];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1712,
+        -1008
+      ],
+      "id": "7df546b3-5f67-4ca2-9230-b51dd6b4ae1f",
+      "name": "Filter Negative Interview1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Set Interview Config (Labels & Links)').item.json['id_google sheet'] }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1657822985,
+          "mode": "list",
+          "cachedResultName": "thank-you email",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MlUaUNBy6YaWdBbi87Co1QDkBQ-hHm7g19G3_g8vDRQ/edit#gid=1657822985"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1536,
+        -1008
+      ],
+      "id": "74e33818-a3f5-4b67-a45a-fd2647ec5933",
+      "name": "Get Reply Email",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GPb8CLBQ6D5yAphG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "64ed51e9-d9ec-4294-9084-db40f66c8a13",
+              "name": "id_google sheet",
+              "value": "1MlUaUNBy6YaWdBbi87Co1QDkBQ-hHm7g19G3_g8vDRQ",
+              "type": "string"
+            },
+            {
+              "id": "434340d8-5710-4dc2-ab44-688a2aeb5a87",
+              "name": "final_interviewer",
+              "value": "veo3studenthuy@gmail.com",
+              "type": "string"
+            },
+            {
+              "id": "51f6c442-25c2-4af4-ae12-728c70ea885d",
+              "name": "final_discord_webhook",
+              "value": "https://discord.com/api/webhooks/1404534186089517172/GKusH_HfaNYarMDwFeBwiKMx6y5-Xa07mKZHMiztTrimHBgVqSNYut0kPmivbvjWORwo",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1536,
+        -496
+      ],
+      "id": "af934357-8d93-45f3-85cd-18c87dde4faf",
+      "name": "Set discord_webhook and Final Interviewer"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Set Interview Config (Labels & Links)').item.json['id_google sheet'] }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1657822985,
+          "mode": "list",
+          "cachedResultName": "thank-you email",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MlUaUNBy6YaWdBbi87Co1QDkBQ-hHm7g19G3_g8vDRQ/edit#gid=1657822985"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Candidate Email": "={{ $('Filter Negative Interview1').item.json.email }}",
+            "Status": "Sent"
+          },
+          "matchingColumns": [
+            "Candidate Email"
+          ],
+          "schema": [
+            {
+              "id": "Candidate Email",
+              "displayName": "Candidate Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        2656,
+        -1008
+      ],
+      "id": "4f4340bf-fd96-4a01-8002-12ebd1812a61",
+      "name": "Save Event Info to Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GPb8CLBQ6D5yAphG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a professional and friendly email confirming the candidate has reached the final round.\nInclude the assessment link: {{ $('Set Interview Config (Labels & Links)').item.json.assessment_link }}\nBase the tone and structure on the example provided, but adjust the wording naturally.\nReturn only the email text.\nCandidate name: {{ $('ExtractEmailMetadata').item.json.senderName }}\nMy company name: Flow Pilot\nSignature: \"Russel Praga\nProject Manager\nFlow Pilot AI Automation\"\nNote: do not need to subject",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        2256,
+        -496
+      ],
+      "id": "1ea136b0-cb27-4a04-ab38-65aa1d8c3d23",
+      "name": "Generate message confirming final round"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -256,
+        -496
+      ],
+      "id": "a705da44-1551-4713-81c1-5e4056e69257",
+      "name": "30 Minutes"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Candidate Reply Email",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Generate Interview Notification Message",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Gmail Labels List": {
+      "main": [
+        [
+          {
+            "node": "Set Interview Config (Labels & Links)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Interview Config (Labels & Links)": {
+      "main": [
+        [
+          {
+            "node": "Search Interview Emails (Last 30 mins)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Interview Emails (Last 30 mins)": {
+      "main": [
+        [
+          {
+            "node": "Split Email List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Email List": {
+      "main": [
+        [
+          {
+            "node": "Get Email Content (Gmail API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Email Content (Gmail API)": {
+      "main": [
+        [
+          {
+            "node": "Map & Match Email Labels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map & Match Email Labels": {
+      "main": [
+        [
+          {
+            "node": "Route by Interview Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Interview Type": {
+      "main": [
+        [
+          {
+            "node": "ExtractSenderEmail1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ExtractEmailMetadata",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ExtractSenderEmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Candidate Reply Email": {
+      "main": [
+        [
+          {
+            "node": "Format Email for Gmail API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Email for Gmail API": {
+      "main": [
+        [
+          {
+            "node": "Send Candidate Email (Gmail API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Candidate Email (Gmail API)": {
+      "main": [
+        [
+          {
+            "node": "Save Event Info to Google Sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Google Sheet & Discord Config": {
+      "main": [
+        [
+          {
+            "node": "Get Candidate Emails (Google Sheets)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Candidate Emails (Google Sheets)": {
+      "main": [
+        [
+          {
+            "node": "Get Google Calendar Events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Google Calendar Events": {
+      "main": [
+        [
+          {
+            "node": "Filter Events & Remove Organizer from Attendees",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Events & Remove Organizer from Attendees": {
+      "main": [
+        [
+          {
+            "node": "Create Calendar Event with Meet Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Calendar Event with Meet Link": {
+      "main": [
+        [
+          {
+            "node": "Save Event Info to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Event Info to Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Generate Interview Notification Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Interview Notification Message": {
+      "main": [
+        [
+          {
+            "node": "Send Notification to Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Google Sheet & Discord Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Initial Interview Infomation": {
+      "main": [
+        [
+          {
+            "node": "Get final Interview Infomation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Email for Gmail API(1)": {
+      "main": [
+        [
+          {
+            "node": "Send Candidate Email (Gmail API) (1)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Candidate Email (Gmail API) (1)": {
+      "main": [
+        [
+          {
+            "node": "Create Calendar Event with Meet Link1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Calendar Event with Meet Link1": {
+      "main": [
+        [
+          {
+            "node": "Save Event Info to Google Sheets [Final Interview]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Interview Notification Message1": {
+      "main": [
+        [
+          {
+            "node": "Send Notification to Discord1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Event Info to Google Sheets [Final Interview]": {
+      "main": [
+        [
+          {
+            "node": "Generate Interview Notification Message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get final Interview Infomation": {
+      "main": [
+        [
+          {
+            "node": "FilterNonFinalInterviewEmails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Email for Gmail API(1)1": {
+      "main": [
+        [
+          {
+            "node": "Send Candidate Email (Gmail API) (1)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "Format Email for Gmail API(1)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Candidate Email (Gmail API) (1)1": {
+      "main": [
+        [
+          {
+            "node": "Save Event Info to Google Sheets [Final Interview]1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get final Interview Infomation1": {
+      "main": [
+        [
+          {
+            "node": "Filter Negative Interview",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate message confirming final round",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Generate Interview Notification Message1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ExtractEmailMetadata": {
+      "main": [
+        [
+          {
+            "node": "Set discord_webhook and Final Interviewer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FilterNonFinalInterviewEmails": {
+      "main": [
+        [
+          {
+            "node": "Generate message confirming final round",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ExtractSenderEmail": {
+      "main": [
+        [
+          {
+            "node": "Get final Interview Infomation1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Negative Interview": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ExtractSenderEmail1": {
+      "main": [
+        [
+          {
+            "node": "Get Reply Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Negative Interview1": {
+      "main": [
+        [
+          {
+            "node": "Generate Candidate Reply Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Reply Email": {
+      "main": [
+        [
+          {
+            "node": "Filter Negative Interview1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set discord_webhook and Final Interviewer": {
+      "main": [
+        [
+          {
+            "node": "Get Initial Interview Infomation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate message confirming final round": {
+      "main": [
+        [
+          {
+            "node": "Format Email for Gmail API(1)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "30 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Get Gmail Labels List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e520abd5-ee6d-4e04-8493-626956493a61",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "dfaacc55a7a89ad988cfabe887f28de88a6f99ccb660fd968e2e75840fe57e2c"
+  },
+  "id": "GTpM0zGCGp01ZtgI",
+  "tags": []
+}
