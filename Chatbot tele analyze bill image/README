@@ -1,0 +1,124 @@
+🎯 Mục đích chính
+
+Tự động nhắc nhở khách hàng khi dịch vụ sắp hết hạn (dựa trên Google Sheets).
+
+Xác minh giao dịch chuyển khoản từ ảnh chụp chứng từ mà khách gửi qua Telegram:
+
+Tự động nhận ảnh.
+
+Trích xuất thông tin (số tiền, nội dung chuyển khoản, ngày giao dịch) bằng Google Gemini AI.
+
+So khớp với thông tin trong Google Sheets.
+
+Gửi thông báo cho khách hàng và CSKH nếu sai sót.
+
+Xác nhận thanh toán thành công nếu đúng.
+
+🛠 Các thành phần chính trong Workflow
+1. Schedule Trigger (Hẹn giờ)
+
+Chạy mỗi sáng lúc 8h.
+
+Kích hoạt việc kiểm tra danh sách khách hàng.
+
+2. Lấy danh sách chưa thanh toán (Google Sheets)
+
+Truy vấn sheet để lấy tất cả khách hàng có trạng thái chưa thanh toán.
+
+3. Lọc những khách hàng đến hạn (Code Node)
+
+Lấy ngày hết hạn dịch vụ từ sheet.
+
+Giữ lại các khách hàng sắp hết hạn trong 11 ngày tới.
+
+4. Tạo nội dung tin nhắn nhắc nhở
+
+Sinh ra tin nhắn cá nhân hóa: tên khách, dịch vụ, phí gia hạn, nội dung chuyển khoản mẫu.
+
+5. Gửi nhắc nhở cho khách hàng (Telegram)
+
+Tự động gửi nhắc nhở đến Telegram ID của khách hàng.
+
+6. Telegram Trigger (Xử lý tin nhắn khách gửi)
+
+Khi khách gửi tin nhắn (ảnh chụp chuyển khoản), workflow sẽ kích hoạt.
+
+7. Check tin nhắn dạng ảnh
+
+Kiểm tra tin nhắn có phải ảnh không.
+
+Nếu không phải → gửi thông báo lỗi (“tin nhắn không phải là ảnh hoặc ảnh quá mờ”).
+
+8. Download ảnh & Upload Google Drive
+
+Lấy file ảnh từ Telegram API.
+
+Chuẩn hóa định dạng ảnh sang image/jpeg.
+
+Upload ảnh vào Google Drive để lưu trữ.
+
+9. Phân tích ảnh bằng Google Gemini
+
+Nhận diện thông tin từ ảnh:
+
+{
+  "số_tiền": 8700000,
+  "nội_dung_chuyển_khoản": "...",
+  "ngày_giao_dịch": "08/09/2025 14:30"
+}
+
+10. Chuyển text sang JSON (Code Node)
+
+Làm sạch dữ liệu Gemini trả về.
+
+Chuẩn hóa số tiền (bỏ ký tự , và VND).
+
+11. Lấy thông tin khách hàng (Google Sheets)
+
+So khớp khách hàng theo “Nội dung chuyển tiền”.
+
+12. Filter + Check nội dung chuyển khoản
+
+Kiểm tra:
+
+Nội dung chuyển khoản có khớp không.
+
+ID khách hàng Telegram có đúng không.
+
+13. Check số tiền chuyển khoản
+
+So sánh số tiền trong ảnh và số tiền cần thanh toán.
+
+👉 Nếu đúng:
+
+Cập nhật trạng thái “Đã thanh toán” trong Google Sheets.
+
+Gửi thông báo xác nhận cho khách hàng.
+
+Gửi thông báo cho CSKH.
+
+👉 Nếu sai:
+
+Gửi cảnh báo cho khách hàng (chuyển khoản sai số tiền / sai nội dung).
+
+Gửi cảnh báo cho CSKH để xử lý thủ công.
+
+📊 Quy trình tóm tắt
+
+Nhắc nhở hằng ngày → Lọc khách sắp hết hạn → Gửi tin nhắn tự động.
+
+Khách gửi ảnh chuyển khoản → Nhận diện bằng AI → So sánh Google Sheets →
+
+✅ Đúng: cập nhật sheet + thông báo xác nhận.
+
+❌ Sai: cảnh báo khách + CSKH.
+
+🚀 Lợi ích
+
+Tự động hóa hoàn toàn quy trình nhắc nhở & xác minh thanh toán.
+
+Tiết kiệm thời gian CSKH vì bot tự kiểm tra và báo lỗi.
+
+Hạn chế sai sót trong quá trình xác minh thủ công.
+
+Lưu trữ bằng Google Drive giúp dễ dàng tra cứu lại chứng từ.
