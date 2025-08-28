@@ -1,0 +1,372 @@
+{
+  "name": "search từ khóa",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        80,
+        0
+      ],
+      "id": "ac3f10e9-33db-4991-9c70-94998373e953",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "engine",
+              "value": "google_trends"
+            },
+            {
+              "name": "q",
+              "value": "={{ $json[\"Từ khóa\"] }}"
+            },
+            {
+              "name": "api_key",
+              "value": "={{ $('Edit Fields').item.json.api_key }}"
+            },
+            {
+              "name": "data_type",
+              "value": "RELATED_QUERIES"
+            },
+            {
+              "name": "geo",
+              "value": "VN"
+            },
+            {
+              "name": "date",
+              "value": "today 12-m"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        80,
+        220
+      ],
+      "id": "d0dd45ed-1df7-414d-82ba-af42387efa93",
+      "name": "Get Google Trends",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $json.id_sheet }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 239419505,
+          "mode": "list",
+          "cachedResultName": "Trang tính8",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-e7BOY62Vn2wX1ekb4UREefNU1te-f08M1xRi3csdCg/edit#gid=239419505"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "kết quả"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        440,
+        0
+      ],
+      "id": "b8fc58b2-87a8-41a7-89c5-022c8c3a387e",
+      "name": "Lấy từ khóa",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lwtfwCmTBg4lm7hg",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Kiểm tra dữ liệu đầu vào\nif (!items || !items[0] || !items[0].json) {\n  return [{ json: { error: \"No input data available\" } }];\n}\n\n// Kiểm tra lỗi từ SerpApi\nif (items[0].json.error) {\n  return [{ json: { error: items[0].json.error, keyword: items[0].json.search_parameters?.q || \"Unknown\" } }];\n}\n\n// Lấy related_queries, mặc định là rỗng nếu không có\nconst relatedQueries = items[0].json.related_queries || { rising: [], top: [] };\n\n// Danh sách từ khóa loại trừ liên quan đến sửa chữa/bảo trì\nconst excludeKeywords = [\n  'sửa', 'sửa chữa', 'bảo trì', 'bảo hành', 'thay', 'fix', 'repair', 'service', 'kỹ thuật', 'sua', 'bao hanh',\n  'lỗi', 'hỏng', 'bảo dưỡng', 'vệ sinh', 've sinh', 'xổ số'\n];\n\n// Hàm chuyển tiếng Việt có dấu thành không dấu\nfunction removeVietnameseTones(str) {\n  return str\n    .normalize('NFD')\n    .replace(/[\\u0300-\\u036f]/g, '')\n    .replace(/đ/g, 'd')\n    .replace(/Đ/g, 'D')\n    .toLowerCase()\n    .replace(/[^a-z0-9]/g, ''); // Loại bỏ ký tự đặc biệt, chỉ giữ chữ và số\n}\n\n// Trích xuất tất cả truy vấn, loại bỏ trùng lặp và từ khóa không mong muốn\nconst seenQueries = new Set();\nconst trends = [\n  ...relatedQueries.rising,\n  ...relatedQueries.top\n]\n  .filter(query => {\n    if (!query || !query.query || query.extracted_value === undefined) return false;\n    if (seenQueries.has(query.query)) return false;\n    const queryLower = query.query.toLowerCase();\n    return !excludeKeywords.some(keyword => queryLower.includes(keyword));\n  })\n  .map(query => ({\n    json: {\n      query: query.query,\n      search_volume: query.extracted_value || 0,\n      hashtag: `#${removeVietnameseTones(query.query)}`\n    }\n  }))\n  .sort((a, b) => b.json.search_volume - a.json.search_volume)\n  .slice(0, 20);\n\n// Tạo chuỗi hashtags\nconst hashtags = trends.map(item => item.json.hashtag).join(' ');\n\n// Trả về kết quả hoặc thông báo\nif (trends.length > 0) {\n  return trends.map(item => ({\n    json: {\n      query: item.json.query,\n      search_volume: item.json.search_volume,\n      hashtags: hashtags // Thêm chuỗi hashtags vào mỗi item\n    }\n  }));\n} else {\n  return [{ json: { message: \"No related queries found\", keyword: items[0].json.search_parameters?.q || \"Unknown\" } }];\n}"
+      },
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        260,
+        220
+      ],
+      "name": "chuyển đổi thành danh sách và chuỗi hashtags",
+      "id": "43f5e2ca-95b2-4f1f-a55b-8de062639e0e"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Edit Fields').item.json.id_sheet }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 745302151,
+          "mode": "list",
+          "cachedResultName": "search",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-e7BOY62Vn2wX1ekb4UREefNU1te-f08M1xRi3csdCg/edit#gid=745302151"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "từ khóa": "={{ $json.query }}",
+            "số lượng tìm kiếm": "={{ $json.search_volume }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "từ khóa",
+              "displayName": "từ khóa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "số lượng tìm kiếm",
+              "displayName": "số lượng tìm kiếm",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        220
+      ],
+      "name": "Lưu từ khóa và số lượng tìm kiếm",
+      "id": "c0061b6f-bbf6-4b03-a59a-ce6bceea6ca0",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lwtfwCmTBg4lm7hg",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Edit Fields').item.json.id_sheet }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 239419505,
+          "mode": "list",
+          "cachedResultName": "Trang tính8",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-e7BOY62Vn2wX1ekb4UREefNU1te-f08M1xRi3csdCg/edit#gid=239419505"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Từ khóa": "={{ $('Get Google Trends').last().json.search_parameters.q }}",
+            "kết quả": "={{ $('chuyển đổi thành danh sách và chuỗi hashtags').last().json.hashtags }}"
+          },
+          "matchingColumns": [
+            "Từ khóa"
+          ],
+          "schema": [
+            {
+              "id": "Từ khóa",
+              "displayName": "Từ khóa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "kết quả",
+              "displayName": "kết quả",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        660,
+        220
+      ],
+      "id": "4c92a3fa-951b-4e8c-9446-66edb488fa2b",
+      "name": "Lưu hashtags",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lwtfwCmTBg4lm7hg",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5e4665f6-b612-4f93-b1f7-56fad295b88a",
+              "name": "id_sheet",
+              "value": "1-e7BOY62Vn2wX1ekb4UREefNU1te-f08M1xRi3csdCg",
+              "type": "string"
+            },
+            {
+              "id": "24a1babd-a1a4-4e18-b5e9-e69f4e0e27f3",
+              "name": "api_key",
+              "value": "6ad190e849f4e468c841982d8d0bd3b01fc3d918c829d4ca6fad48996606b8b7",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        260,
+        0
+      ],
+      "id": "47e387e2-288b-49a6-8b5f-b93826070ebd",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        620,
+        0
+      ],
+      "id": "0454cd93-b59f-4f2e-87a1-822708765545",
+      "name": "Wait",
+      "webhookId": "48924766-d966-4b59-be07-b736f1d6f6c1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Google Trends": {
+      "main": [
+        [
+          {
+            "node": "chuyển đổi thành danh sách và chuỗi hashtags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lấy từ khóa": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "chuyển đổi thành danh sách và chuỗi hashtags": {
+      "main": [
+        [
+          {
+            "node": "Lưu từ khóa và số lượng tìm kiếm",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lưu từ khóa và số lượng tìm kiếm": {
+      "main": [
+        [
+          {
+            "node": "Lưu hashtags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Lấy từ khóa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get Google Trends",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1e4f88cd-6104-4efc-9544-5b2ac0026962",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cc18735aefda8a09008f693b61ff4376f651ad1ef69c0d04c44d62c1c22c17b4"
+  },
+  "id": "yNLkkfTHLahsJalW",
+  "tags": []
+}
