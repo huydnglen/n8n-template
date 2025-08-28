@@ -1,0 +1,60 @@
+Workflow này được xây dựng trên n8n, với mục đích chính là scrape (thu thập) và phân tích quảng cáo Facebook từ một fanpage cụ thể, sử dụng API của Apify (một công cụ scrape web) và tích hợp AI (OpenAI) để phân tích nội dung. Nó tập trung vào việc lấy dữ liệu quảng cáo đang hoạt động (active ads) từ Facebook Ads Library, xử lý media (hình ảnh/video), transcribe video (sử dụng AssemblyAI), phân tích bằng LLM (Large Language Model), và lưu kết quả vào Google Sheets. Cuối cùng, nó tổng hợp để đánh giá toàn bộ chiến dịch quảng cáo.
+
+Mục tiêu tổng thể:
+Nhận input từ form: page_id (ID fanpage) và total results (số lượng quảng cáo tối đa).
+Scrape quảng cáo từ Facebook Ads Library.
+Phân loại theo display format (MULTI_IMAGES, SINGLE_IMAGE, VIDEO, v.v.).
+Xử lý media: Trích xuất URL hình ảnh/video, transcribe video sang text (bằng tiếng Việt).
+Phân tích từng quảng cáo bằng AI: Mô tả hình ảnh, transcript video, caption, CTA, và đánh giá tổng thể.
+Tổng hợp phân tích tất cả quảng cáo để đánh giá chiến dịch.
+Lưu dữ liệu thô vào sheet "DATA THÔ", phân tích chi tiết vào sheet khác, và phân tích tổng thể vào "Phân tích tổng thể".
+Thêm phần scrape comments từ posts tương ứng (nhưng chưa hoàn thiện đầy đủ trong JSON).
+
+
+Đặc điểm nổi bật:
+Sử dụng Apify cho scrape (HTTP Request đến Apify API), AssemblyAI cho transcribe video.
+Phân loại quảng cáo bằng Switch node dựa trên displayformat.
+Xử lý video: Gửi audio_url đến AssemblyAI, poll status đến khi hoàn thành, extract transcript.
+Xử lý hình ảnh: Split URL, analyze bằng OpenAI Vision (mô tả hình ảnh).
+AI phân tích: Sử dụng GPT-4o-mini cho chain LLM (phân tích video/transcript) và AI Agent (phân tích hình ảnh).
+Tổng hợp: Aggregate outputs, sau đó dùng LLM để đánh giá chiến dịch toàn cục.
+Lưu ý: Workflow có loop (SplitInBatches) để xử lý batch quảng cáo, và wait để poll transcript status.
+Có phần scrape posts và comments (HTTP Request1, Code2, HTTP Request2), nhưng kết nối chưa đầy đủ (có thể để scrape comments từ post tương ứng với ad).
+Yêu cầu API keys: Apify token, AssemblyAI bearer, OpenAI API.
+Luồng Dữ Liệu:
+
+Form input → Scrape ads → Xử lý data → Switch theo format.
+Non-video: Split images → Analyze bằng OpenAI → AI Agent phân tích → Merge.
+Video: Transcribe bằng AssemblyAI (loop poll) → LLM Chain phân tích → Merge.
+Merge → Lưu chi tiết (Google Sheets1, không liệt kê đầy) → Aggregate → LLM tổng thể → Lưu tổng (Google Sheets2).
+Branch phụ: Loop scrape posts/comments (có thể để lấy engagement).
+
+
+Yêu Cầu Kỹ Thuật:
+Workflow ID: "XeDEHGIMuhsDzO8w".
+Active: false.
+Credentials: Google Sheets OAuth2, OpenAI API, Apify token hardcoded, AssemblyAI bearer hardcoded (thay đổi để an toàn).
+
+Hướng Dẫn Sử Dụng Workflow
+Chuẩn Bị:
+API Keys:
+Apify: Token "apify_api_lHBtlRljggXZjCgPMKuxhumIMMdTBB0jD7RT" (thay bằng của bạn).
+AssemblyAI: Bearer "5b3fe8838188442c850007a6c565af67".
+OpenAI: Credential "OpenAi account" với API key.
+Google Sheets: ID "1s80OGxCaNIrC8fRzCMfrzr4YssrKD_YROY65FhA8bOA", sheets: "DATA THÔ" (gid=51117966), "Phân tích tổng thể" (gid=2116389451). Cột phải khớp (adArchiveID, text, v.v.).
+n8n Setup: Import JSON vào n8n, lưu workflow.
+
+Import và Cấu Hình:
+Paste JSON vào n8n editor.
+Chỉnh HTTP Request1: Thay startUrls hardcoded bằng dynamic từ page_id (ví dụ: "https://www.facebook.com/{{ $json.page_id }}/").
+Kiểm tra prompts trong LLM nodes để tùy chỉnh phân tích (ngành Beauty Salon/Spa).
+Test credentials.
+
+Test Workflow:
+Nhấp "Test workflow", submit form với page_id (ví dụ: "vienthammydiva.vn" hoặc ID số), total results (ví dụ: 10).
+Theo dõi: Output từng node, đặc biệt poll transcript (có thể mất vài phút).
+Debug: Nếu lỗi rate limit (Apify/AssemblyAI), tăng wait time.
+
+Chạy Thực Tế:
+Active workflow, chạy thủ công hoặc schedule.
+Output: Dữ liệu thô và phân tích lưu vào sheets, bao gồm đánh giá chiến dịch.
