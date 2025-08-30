@@ -1,0 +1,620 @@
+{
+  "name": "download_tiktok&sound_to_text",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "={{ $json.message.text }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0.4472.124"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "02f03738-e9cb-49ad-9088-b3550f03f2b1",
+      "name": "Get TikTok Video Page Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -500,
+        20
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "jsCode": "const html = $input.first().json.data;\nconst headers = $input.first().json.headers || {};\nconst cookies = headers['set-cookie'] || [];\n\nif (!html) {\n  throw new Error(\"HTML body is undefined. Check the previous node's output.\");\n}\nconst regex = /<script id=\"__UNIVERSAL_DATA_FOR_REHYDRATION__\" type=\"application\\/json\">([\\s\\S]*?)<\\/script>/;\nconst match = html.match(regex);\n\nif (match) {\n  const jsonStr = match[1];\n  const data = JSON.parse(jsonStr);\n  const videoUrl = data?.__DEFAULT_SCOPE__?.[\"webapp.video-detail\"]?.itemInfo?.itemStruct?.video?.playAddr;\n  if (!videoUrl) {\n    throw new Error(\"Could not find video URL in the JSON data.\");\n  }\n  return [{ json: { videoUrl, cookies: cookies.join('; ') } }];\n} else {\n  throw new Error(\"Could not find __UNIVERSAL_DATA_FOR_REHYDRATION__ script in the HTML.\");\n}"
+      },
+      "id": "9567f243-9caa-48a2-a1ed-282aa6e73b82",
+      "name": "Scrape raw video URL",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -300,
+        20
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Scrape raw video URL').item.json.videoUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            },
+            {
+              "name": "Referer",
+              "value": "https://www.tiktok.com/"
+            },
+            {
+              "name": "Accept",
+              "value": "video/mp4,video/webm,video/*;q=0.9,application/octet-stream;q=0.8"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.5"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Cookie",
+              "value": "={{ $('Scrape raw video URL').item.json.cookies }}"
+            }
+          ]
+        },
+        "options": {
+          "allowUnauthorizedCerts": true,
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "510a57d9-65a5-4f3d-8341-4445032cb88a",
+      "name": "Output video file without watermark",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        400,
+        20
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.assemblyai.com/v2/transcript",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Authorization\": \"Bearer 5b3fe8838188442c850007a6c565af67\",\n  \"Content-Type\": \"application/json\"\n}\n",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "audio_url",
+              "value": "=https://testn8n.b-cdn.net/{{ $(' Create folder name').item.json.folderName }}/{{ $json.file_name }}.mp4"
+            },
+            {
+              "name": "language_code",
+              "value": "vi"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -540,
+        260
+      ],
+      "id": "61af18e6-99bc-46d0-b070-84226d1f6937",
+      "name": "Send to AssemblyAI"
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -340,
+        260
+      ],
+      "id": "def97dfc-2187-4912-9aef-32c706a276ab",
+      "name": "Wait",
+      "webhookId": "3d0f10eb-d177-439d-a99d-a11b95e1139a"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.assemblyai.com/v2/transcript/{{ $json.id }}",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Authorization\": \"Bearer 5b3fe8838188442c850007a6c565af67\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -160,
+        260
+      ],
+      "id": "13b43778-a218-4503-8968-f9cd17cd6494",
+      "name": "Check transcript status"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "470d582c-e2eb-43fa-a1f1-7464c3dfe555",
+              "name": "transcript",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        260
+      ],
+      "id": "c099895b-dba8-4453-adf1-e801f069bde0",
+      "name": "Extract transcript"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -960,
+        20
+      ],
+      "id": "5190286b-0d0b-4498-abf5-0829547d4940",
+      "name": "Telegram Trigger",
+      "webhookId": "98e4773b-8c9e-4af3-a8a2-975c2db57926",
+      "credentials": {
+        "telegramApi": {
+          "id": "S5bYTVajphwjfIgT",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ac8c72c4-0a48-4cfb-9e98-48f14b6a5b94",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        260
+      ],
+      "id": "bf4f4f2a-13c9-4812-9c45-8e12b458af20",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://storage.bunnycdn.com/n8ntesst/{{ $(' Create folder name').item.json.folderName }}/{{$binary.data.fileName}}.mp4",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "AccessKey",
+              "value": "de769e03-db9d-48c8-8df993a1e5af-26df-4f95"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        700,
+        20
+      ],
+      "id": "b6b7fc32-0b22-4781-9c36-e3fb79795d93",
+      "name": "Upload Video to Bunny"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://storage.bunnycdn.com/n8ntesst/{{ $(' Create folder name').item.json.folderName }}/transcript.txt",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "AccessKey",
+              "value": "de769e03-db9d-48c8-8df993a1e5af-26df-4f95"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        260
+      ],
+      "id": "327d9467-78d6-4df0-89e0-60fa62d8d2b0",
+      "name": "Upload transcript to Bunny"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=🎥 Video URL: https://testn8n.b-cdn.net/{{ $(' Create folder name').item.json.folderName }}/{{ $('Edit Fields').item.json.file_name }}.mp4  \n📄 Transcript link: https://testn8n.b-cdn.net/{{ $(' Create folder name').item.json.folderName }}/transcript.txt\n\n📄 Transcript: {{ $('Extract transcript').item.json.transcript }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        260
+      ],
+      "id": "17ba0a23-e7dc-4f0c-b8a9-bbbf4325d555",
+      "name": "Telegram",
+      "webhookId": "8472d6f8-ff5d-4736-ab4b-86c3d7ea49bd",
+      "credentials": {
+        "telegramApi": {
+          "id": "S5bYTVajphwjfIgT",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst pad = (n) => n.toString().padStart(2, '0');\nconst folderName = \n  pad(now.getHours()) + \n  pad(now.getMinutes()) + \n  pad(now.getSeconds()) + \n  pad(now.getDate()) + \n  pad(now.getMonth() + 1) + \n  now.getFullYear();\n\nreturn [{ json: { folderName } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        20
+      ],
+      "id": "3885f131-6819-46dc-9634-bb4bf265830a",
+      "name": " Create folder name"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://storage.bunnycdn.com/n8ntesst/{{$json.folderName}}/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "AccessKey",
+              "value": "de769e03-db9d-48c8-8df993a1e5af-26df-4f95"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        160,
+        20
+      ],
+      "id": "55a4f8df-b651-4a5f-9c59-59a5dded86a7",
+      "name": "Create folder on Bunny"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    binary: {\n      data: await this.helpers.prepareBinaryData(\n        Buffer.from($json.transcript, 'utf8'),\n        'transcript.txt',\n        'text/plain'\n      )\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        260
+      ],
+      "id": "797182c5-3951-40f5-88a4-190dbf7e18e7",
+      "name": "Create txt file"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d8c49260-c5a7-496d-9bc4-5cb77e39d15a",
+              "name": "file_name",
+              "value": "={{$binary.data.fileName}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -740,
+        260
+      ],
+      "id": "0270a6ff-867c-4326-9f24-c683c3cffd34",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ca6979ba-70f2-42a3-81df-29d3ac7bea3c",
+              "leftValue": "={{ $json.message.chat.id }}",
+              "rightValue": -1002642208982,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -740,
+        20
+      ],
+      "id": "88a7e6ec-43b8-425b-bf4c-b5aad9224a9c",
+      "name": "If1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get TikTok Video Page Data": {
+      "main": [
+        [
+          {
+            "node": "Scrape raw video URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape raw video URL": {
+      "main": [
+        [
+          {
+            "node": " Create folder name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Output video file without watermark": {
+      "main": [
+        [
+          {
+            "node": "Upload Video to Bunny",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to AssemblyAI": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Check transcript status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check transcript status": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Extract transcript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Video to Bunny": {
+      "main": [
+        []
+      ]
+    },
+    "Extract transcript": {
+      "main": [
+        [
+          {
+            "node": "Create txt file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload transcript to Bunny": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    " Create folder name": {
+      "main": [
+        [
+          {
+            "node": "Create folder on Bunny",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create folder on Bunny": {
+      "main": [
+        [
+          {
+            "node": "Output video file without watermark",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create txt file": {
+      "main": [
+        [
+          {
+            "node": "Upload transcript to Bunny",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send to AssemblyAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Get TikTok Video Page Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "bd4c82ce-f5fe-4a4a-a206-a83d0876b68c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5e173a625f9ed547961e1b211df18c0094f6c44d4c822be58e22e7bd2b7fb2e5"
+  },
+  "id": "N13kBsW5yF9nbcqG",
+  "tags": []
+}
