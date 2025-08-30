@@ -1,0 +1,941 @@
+{
+  "name": "get_social",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        520
+      ],
+      "id": "3e7d4e45-e6fa-4b35-afef-be2224e494e2",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1d2c9c24-c787-42d2-ae8e-e857505e9540",
+              "name": "ins_id",
+              "value": "17841473463483829",
+              "type": "string"
+            },
+            {
+              "id": "a9068585-dd6d-436b-a082-b4c28ea52a65",
+              "name": "access_token",
+              "value": "EAAaepltWyO0BOxq0E9b4wyhvEab0DNtMmjHIc3C9mpnd2ekIUmUL8roMKZBbCzqAyx0X8prO2DjU1fzJu2EyGfk0eiXokbLSczP8uu28RsKpx3Otgsj0mxr50M0TqaRW5p6yUtIaPbJNsmNr6OGKncjjYAIQMKdW4lHmXtGYAZAPJH2sNJk4O4Y7nD4BOOLYO5vo7wHFSImX8ZD",
+              "type": "string"
+            },
+            {
+              "id": "3b7b5fea-b00e-4c01-91d9-caccf6794843",
+              "name": "id_channel",
+              "value": "UCZHTVdSA-zXTQ2HlCsFs9Lg",
+              "type": "string"
+            },
+            {
+              "id": "c72f875c-b61c-4fab-9d29-cc683f6128e6",
+              "name": "api_key",
+              "value": "AIzaSyATKg0W6JQntTEdPqcosm-SGgBNqmI1sFk",
+              "type": "string"
+            },
+            {
+              "id": "e0ccf35f-676f-4cda-9d06-0f9d1b294b55",
+              "name": "page_id",
+              "value": "115025391584003",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -400,
+        520
+      ],
+      "id": "3c476c58-23c0-4cc6-9e44-403f4c6f0fdc",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        20,
+        340
+      ],
+      "id": "31d86530-293a-4f85-872b-aca85e2f28d5",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = items[0].json.data;\nconst nextUrl = items[0].json.paging?.next;\n\nconst output = [];\n\nconst cutoffTime = new Date(\"2025-04-19T17:10:00Z\"); // UTC time\n\nfor (const post of data) {\n  const postTime = new Date(post.timestamp);\n\n  // Chỉ xử lý các REELS đăng sau thời điểm chuyển sang tài khoản Business\n  if (post.media_product_type === \"REELS\" && postTime > cutoffTime) {\n    output.push({\n      json: {\n        media_id: post.id,\n        likes: post.like_count,\n        comments: post.comments_count,\n        media_type: post.media_type,\n        media_product_type: post.media_product_type,\n        permalink: post.permalink,\n        timestamp: post.timestamp\n      }\n    });\n  }\n}\n\n// Giữ lại next page nếu có\nif (nextUrl) {\n  output.push({\n    json: {\n      url: nextUrl,\n      continue: true\n    }\n  });\n}\n\nreturn output;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        340
+      ],
+      "id": "2945193d-b8e7-46de-aa1a-b3912ec8ea1b",
+      "name": "Code4"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1-e7BOY62Vn2wX1ekb4UREefNU1te-f08M1xRi3csdCg",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1817898372,
+          "mode": "list",
+          "cachedResultName": "Trang tính6",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-e7BOY62Vn2wX1ekb4UREefNU1te-f08M1xRi3csdCg/edit#gid=1817898372"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "media_id": "={{ $('If2').item.json.media_id }}",
+            "likes": "={{ $('If2').item.json.likes }}",
+            "permalink": "={{ $('If2').item.json.permalink }}",
+            "comments": "={{ $('If2').item.json.comments }}",
+            "views": "={{ $json.data[0].values[0].value }}"
+          },
+          "matchingColumns": [
+            "media_id"
+          ],
+          "schema": [
+            {
+              "id": "media_id",
+              "displayName": "media_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "likes",
+              "displayName": "likes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "comments",
+              "displayName": "comments",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "views",
+              "displayName": "views",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "permalink",
+              "displayName": "permalink",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        840,
+        340
+      ],
+      "id": "0ad5d468-8935-4a5d-ad4e-351569f6924b",
+      "name": "Google Sheets2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "aTPitwOoAMqK14hM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v21.0/{{ $json.media_id }}/insights?metric=views&access_token={{ $('Edit Fields1').item.json.access_token }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        340
+      ],
+      "id": "a3e61439-aefb-4310-a2b4-b33ebd74fcba",
+      "name": "HTTP Request6"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "24721560-7ff7-4a6b-aea7-a772e4701ebf",
+              "leftValue": "={{ $json.continue }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        400,
+        340
+      ],
+      "id": "a1709bae-56bb-4f78-b93a-a3e415677763",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "url": "=https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id={{ $json.id_channel }}&key={{ $json.api_key }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -180,
+        660
+      ],
+      "id": "df083a94-2b76-4a0d-a3e9-68110a55ee25",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "url": "=https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&playlistId={{ $('Edit Fields').item.json.id }}&maxResults=50{{ $json.nextPageToken ? '&pageToken=' + $json.nextPageToken : '' }}&key={{ $('Edit Fields1').item.json.api_key }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        200,
+        660
+      ],
+      "id": "ce03640f-336b-4799-81d9-41e5e26054e6",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst videoIds = items\n  .flatMap(item => item.json.items || [])\n  .filter(playlistItem => playlistItem?.contentDetails?.videoId)\n  .map(playlistItem => playlistItem.contentDetails.videoId);\nreturn [{ json: { videoIds: videoIds.join(',') } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        660
+      ],
+      "id": "a671f465-a3ac-4eeb-b1da-48e4e0fcda2e",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "url": "=https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id={{ $json.videoIds }}&key={{ $('Edit Fields1').item.json.api_key }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        800,
+        660
+      ],
+      "id": "b63512b9-ff59-4baa-a103-0a5c745644f7",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst results = items\n  .flatMap(item => item.json.items || [])\n  .filter(video => video?.id && video?.statistics)\n  .map(video => {\n    const videoData = {\n      videoId: video.id,\n      title: video.snippet?.title || 'N/A',\n      views: video.statistics.viewCount || '0',\n      likes: video.statistics.likeCount || '0',\n      favorites: video.statistics.favoriteCount || '0',\n      comments: video.statistics.commentCount || '0'\n    };\n    \n    const sheetRow = {\n      \"Video ID\": videoData.videoId,\n      Title: videoData.title,\n      Views: videoData.views,\n      Likes: videoData.likes,\n      Favorites: videoData.favorites,\n      Comments: videoData.comments\n    };\n    \n    return { json: sheetRow };\n  });\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        660
+      ],
+      "id": "41ab630d-46b1-4512-9985-45dc40387c6e",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1-e7BOY62Vn2wX1ekb4UREefNU1te-f08M1xRi3csdCg",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 382956073,
+          "mode": "list",
+          "cachedResultName": "Trang tính3",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-e7BOY62Vn2wX1ekb4UREefNU1te-f08M1xRi3csdCg/edit#gid=382956073"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Video ID": "={{ $json['Video ID'] }}",
+            "Title": "={{ $json.Title }}",
+            "Views": "={{ $json.Views }}",
+            "Likes": "={{ $json.Likes }}",
+            "Favorites": "={{ $json.Favorites }}",
+            "Comments": "={{ $json.Comments }}"
+          },
+          "matchingColumns": [
+            "Video ID"
+          ],
+          "schema": [
+            {
+              "id": "Video ID",
+              "displayName": "Video ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Views",
+              "displayName": "Views",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Likes",
+              "displayName": "Likes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Favorites",
+              "displayName": "Favorites",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Comments",
+              "displayName": "Comments",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1120,
+        660
+      ],
+      "id": "3e010242-3ac7-46a2-bfc7-7e3f57be4dff",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "aTPitwOoAMqK14hM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d4a98b09-f58c-4c7d-b78a-75f0b3f0f9f3",
+              "leftValue": "={{ $json.nextPageToken }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        420,
+        660
+      ],
+      "id": "db120a79-36b2-486a-b464-1208ddbb9c56",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "const nextPageToken = $input.first().json.nextPageToken;\nif (!nextPageToken) {\n  return [{ json: { stopLoop: true } }]; // Dừng khi không còn trang tiếp theo\n}\nreturn [{ json: { nextPageToken } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        420,
+        900
+      ],
+      "id": "c6ff7261-8087-4d33-9380-d6b80cf8f715",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ff9bc6ff-c878-4c1d-9c0b-ecacb8cc513d",
+              "name": "id",
+              "value": "={{ $json.items[0].contentDetails.relatedPlaylists.uploads }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -20,
+        660
+      ],
+      "id": "682ab25c-b1e1-477f-b49c-91378f5d68ae",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v20.0/{{ $json.page_id }}/videos?fields=id,created_time,description,source,permalink_url,length,likes.summary(true),comments.summary(true),views",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "EAAaepltWyO0BOxq0E9b4wyhvEab0DNtMmjHIc3C9mpnd2ekIUmUL8roMKZBbCzqAyx0X8prO2DjU1fzJu2EyGfk0eiXokbLSczP8uu28RsKpx3Otgsj0mxr50M0TqaRW5p6yUtIaPbJNsmNr6OGKncjjYAIQMKdW4lHmXtGYAZAPJH2sNJk4O4Y7nD4BOOLYO5vo7wHFSImX8ZD"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -120,
+        1180
+      ],
+      "id": "dbe8b664-9015-4372-a5a4-215052718ca4",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1-e7BOY62Vn2wX1ekb4UREefNU1te-f08M1xRi3csdCg",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1633505914,
+          "mode": "list",
+          "cachedResultName": "Trang tính4",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-e7BOY62Vn2wX1ekb4UREefNU1te-f08M1xRi3csdCg/edit#gid=1633505914"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.video_id }}",
+            "like": "={{ $json.likes }}",
+            "cmt": "={{ $json.comments }}",
+            "view": "={{ $json.views }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "view",
+              "displayName": "view",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "like",
+              "displayName": "like",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cmt",
+              "displayName": "cmt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        540,
+        1180
+      ],
+      "id": "8a8b864d-35a4-4f4e-928d-9104f3500903",
+      "name": "Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "aTPitwOoAMqK14hM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nlet allVideos = [];\n\nfunction formatDateTime(isoString) {\n  const date = new Date(isoString);\n  date.setHours(date.getHours() + 7); // UTC+7\n  const hours = String(date.getHours()).padStart(2, '0');\n  const minutes = String(date.getMinutes()).padStart(2, '0');\n  const day = String(date.getDate()).padStart(2, '0');\n  const month = String(date.getMonth() + 1).padStart(2, '0');\n  const year = date.getFullYear();\n  return `${hours}:${minutes} ${day}/${month}/${year}`;\n}\n\n// Log input for debugging\nconsole.log('Input items:', JSON.stringify(items, null, 2));\n\n// Process videos from input\nitems.forEach(item => {\n  if (item.json.data) {\n    const videos = item.json.data || [];\n    allVideos.push(...videos.filter(video => video.length <= 60)); // Filter Reels\n  }\n});\n\n// Format video data\nconst formattedVideos = allVideos.map(video => ({\n  json: {\n    video_id: video.id,\n    created_time: formatDateTime(video.created_time),\n    url: video.permalink_url,\n    length: video.length,\n    likes: video.likes?.summary?.total_count || 0,\n    comments: video.comments?.summary?.total_count || 0,\n    views: video.views || 0\n  }\n}));\n\n// Stop if 200 videos reached\nif (allVideos.length >= 200) {\n  console.log('Reached 200 videos, stopping pagination');\n  return formattedVideos;\n}\n\n// Get and validate next_page\nconst nextPage = items[0]?.json.paging?.next;\nconsole.log('Next page:', nextPage || 'No next page');\n\n// Only include next_page if it's a valid URL\nif (nextPage && typeof nextPage === 'string' && nextPage.startsWith('https://')) {\n  console.log('Adding valid next_page to output');\n  return [\n    ...formattedVideos,\n    { json: { next_page: nextPage } }\n  ];\n}\n\nconsole.log('Stopping: No valid next_page');\nreturn formattedVideos;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        120,
+        1180
+      ],
+      "id": "3f68bb4e-9520-4027-b943-429fe0b5ade4",
+      "name": "Code3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8ecc169a-22e5-4259-a264-db0d4e725807",
+              "leftValue": "={{ $json.next_page }}",
+              "rightValue": "^https://",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "636f2950-c681-4fe5-abbd-ff44b7cbcb7c",
+              "leftValue": "={{ $json.video_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        300,
+        1180
+      ],
+      "id": "ac6092db-4a3b-454a-876b-4491f1be0870",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.next_page }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        280,
+        1420
+      ],
+      "id": "add100de-e3c9-4593-9209-bda69ab9e511",
+      "name": "HTTP Request5"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f51059b1-250f-468d-abe9-1f46f77a524d",
+              "name": "url",
+              "value": "=https://graph.facebook.com/v21.0/{{ $json.ins_id }}/media?fields=id,media_type,media_product_type,timestamp,like_count,comments_count,permalink&access_token={{ $json.access_token }}&limit=25",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -180,
+        340
+      ],
+      "id": "d0d4b2b9-c1b7-491c-88f3-c09fa072299b",
+      "name": "Edit Fields3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "Code4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code4": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request6": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request5": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "01c2d9d5-1cdd-4288-9e96-23e5216eef29",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5e173a625f9ed547961e1b211df18c0094f6c44d4c822be58e22e7bd2b7fb2e5"
+  },
+  "id": "wHHfJpq574MvL75H",
+  "tags": []
+}
