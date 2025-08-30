@@ -1,0 +1,876 @@
+{
+  "name": "GGS + GG DRIVE -> FACEBOOK",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1-e7BOY62Vn2wX1ekb4UREefNU1te-f08M1xRi3csdCg",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Trang tính1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-e7BOY62Vn2wX1ekb4UREefNU1te-f08M1xRi3csdCg/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -840,
+        300
+      ],
+      "id": "d6bb51d0-3f69-4a89-bf23-f020d3435c76",
+      "name": "Google Sheets",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "lwtfwCmTBg4lm7hg",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 20,
+              "triggerAtMinute": 30
+            },
+            {
+              "triggerAtHour": 9
+            },
+            {
+              "triggerAtHour": 15
+            },
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -980,
+        300
+      ],
+      "id": "9d936f31-69f1-4fe6-ad51-11b44eb5ebe4",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $json.File }}",
+        "limit": 1,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "15sF5vFnJHzbhDjDwNNCo6UvNts73-8yj",
+            "mode": "id"
+          },
+          "whatToSearch": "files"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -220,
+        140
+      ],
+      "id": "5437a481-f952-4dd7-8855-03b9468aaf9c",
+      "name": "Find ID of File",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "maxTries": 5,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "5eej2zrcQVtv9Ctc",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -20,
+        140
+      ],
+      "id": "407fa171-b4dd-4315-84ad-82c395de7475",
+      "name": "Download Photo",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "maxTries": 5,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "5eej2zrcQVtv9Ctc",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Find ID of File1').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -20,
+        320
+      ],
+      "id": "6f9ba07f-4367-4b69-8580-cf33ebd851f2",
+      "name": "Download Video",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "maxTries": 5,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "5eej2zrcQVtv9Ctc",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $json.File }}",
+        "limit": 1,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "15sF5vFnJHzbhDjDwNNCo6UvNts73-8yj",
+            "mode": "id"
+          },
+          "whatToSearch": "files"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -220,
+        320
+      ],
+      "id": "e7c63561-3c42-455c-9c16-216fc6c3d040",
+      "name": "Find ID of File1",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "maxTries": 5,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "5eej2zrcQVtv9Ctc",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.Type }}",
+                    "rightValue": "photo",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "3559aa2e-f229-40f8-9cef-f236d95bb927"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "531f4356-6f03-4e5a-85e9-730260a4d128",
+                    "leftValue": "={{ $json.Type }}",
+                    "rightValue": "reels",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "805a8fad-cb11-4e8e-aa13-a8f18f449428",
+                    "leftValue": "={{ $json.Type }}",
+                    "rightValue": "video",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -500,
+        300
+      ],
+      "id": "8c9e93e1-1944-4cae-bf9d-d647b27906d5",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lặp qua từng dòng từ Google Sheets\nreturn items.map(item => {\n  const dateStr = item.json[\"Ngày đăng\"];  // ví dụ \"15/4/2025\"\n  const timeStr = item.json[\"Giờ đăng\"];   // ví dụ \"09:30\"\n\n  // Parse ngày & giờ\n  const [day, month, year] = dateStr.split(\"/\").map(Number);\n  const [hour, minute] = timeStr.split(\":\").map(Number);\n\n  // Tạo Date ở múi giờ Việt Nam bằng cách dùng chuỗi ISO\n  const localDateTime = new Date(`${year}-${month.toString().padStart(2, \"0\")}-${day.toString().padStart(2, \"0\")}T${hour.toString().padStart(2, \"0\")}:${minute.toString().padStart(2, \"0\")}:00+07:00`);\n\n  // Chuyển sang timestamp giây (Facebook yêu cầu giây)\n  const unixTimestamp = Math.floor(localDateTime.getTime() / 1000);\n\n  // Trả kết quả\n  return {\n    json: {\n      ...item.json,\n      unixTimestamp,\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -680,
+        300
+      ],
+      "id": "95dcd5ca-31a1-4f1a-9433-1a2c1ece489e",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Find ID of File2').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -20,
+        520
+      ],
+      "id": "e425ff8a-00e7-4bb2-ae96-3e620e330aac",
+      "name": "Download Video1",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "maxTries": 5,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "5eej2zrcQVtv9Ctc",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $json.File }}",
+        "limit": 1,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "15sF5vFnJHzbhDjDwNNCo6UvNts73-8yj",
+            "mode": "id"
+          },
+          "whatToSearch": "files"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -220,
+        520
+      ],
+      "id": "fad58ac6-321f-4306-a047-f7d4919eb779",
+      "name": "Find ID of File2",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "maxTries": 5,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "5eej2zrcQVtv9Ctc",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v20.0",
+        "node": "me",
+        "edge": "feed",
+        "sendBinaryData": true,
+        "binaryPropertyName": "data",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "message",
+                "value": "={{ $('Switch').item.json.Title }}\n{{ $('Switch').item.json.Content }}"
+              },
+              {
+                "name": "attached_media[0][media_fbid]",
+                "value": "={{ $json.id }}"
+              },
+              {
+                "name": "published",
+                "value": "false"
+              },
+              {
+                "name": "scheduled_publish_time",
+                "value": "={{ $('Switch').item.json.unixTimestamp }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        340,
+        520
+      ],
+      "id": "7be8196d-7999-4745-a7cd-b860bda2bdc0",
+      "name": "Facebook Video",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "WS5l07zIw21wlxOE",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v20.0",
+        "node": "me",
+        "edge": "photos",
+        "sendBinaryData": true,
+        "binaryPropertyName": "data",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "published",
+                "value": "false"
+              },
+              {
+                "name": "source",
+                "value": "={{ $json.name }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        180,
+        140
+      ],
+      "id": "a59b2876-25f3-4faf-9f99-f35eb0a5a224",
+      "name": "Facebook Graph API1",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "WS5l07zIw21wlxOE",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v20.0",
+        "node": "me",
+        "edge": "feed",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "message",
+                "value": "={{ $('Switch').item.json.Title }}\n\n{{ $('Switch').item.json.Content }}"
+              },
+              {
+                "name": "scheduled_publish_time",
+                "value": "={{ $('Switch').item.json.unixTimestamp }}"
+              },
+              {
+                "name": "attached_media[0][media_fbid]",
+                "value": "={{ $json.id }}"
+              },
+              {
+                "name": "published",
+                "value": "false"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        360,
+        140
+      ],
+      "id": "7ba6f7e3-ac1a-43b6-a0bd-90955c8ff5d8",
+      "name": "Facebook Photos1",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "WS5l07zIw21wlxOE",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v20.0",
+        "node": "me",
+        "edge": "videos",
+        "sendBinaryData": true,
+        "binaryPropertyName": "data",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "published",
+                "value": "false"
+              },
+              {
+                "name": "source",
+                "value": "={{ $json.name }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        160,
+        520
+      ],
+      "id": "79080a73-0d40-4a56-aeb1-a42acd8dd7e6",
+      "name": "Facebook Graph API",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "WS5l07zIw21wlxOE",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v20.0",
+        "node": "me",
+        "edge": "videos",
+        "sendBinaryData": true,
+        "binaryPropertyName": "data",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "published",
+                "value": "false"
+              },
+              {
+                "name": "source",
+                "value": "={{ $json.name }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        180,
+        320
+      ],
+      "id": "833323c0-3ea9-4d22-ac94-4ebe92440e84",
+      "name": "Facebook Graph API2",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "WS5l07zIw21wlxOE",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph-video.facebook.com/v20.0/113114481775490/videos",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "EAAaepltWyO0BO1PTuweokvDeRtaqDFIO2Uu3TdPbNouAzqllwRxnS0oU1a77JMXKZCVuwqyKFBNkn3snZCrDrZBtpKBBd4Vami5HhIHQjiCpQRo7AulkmCMntO9mq9HqsTZAM6eE0ZCKR6pL3uh305fqox8LCSxw4niGW2ZCCJKs3UdEQTh93USS8iYYPd6oXm6HBcP8IYfAS6SvJF1IZAYl71sEPsqfgOwE31AiI4ZD"
+            },
+            {
+              "name": "description",
+              "value": "={{ $('Switch').item.json.Title }}\n\n{{ $('Switch').item.json.Title\n}}"
+            },
+            {
+              "name": "published",
+              "value": "false"
+            },
+            {
+              "name": "video_state",
+              "value": "REELS"
+            },
+            {
+              "name": "scheduled_publish_time",
+              "value": "={{ $('Switch').item.json.unixTimestamp }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        400,
+        320
+      ],
+      "id": "3e359dfa-ee32-42a5-a1ad-c6f7b25e092e",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph-video.facebook.com/v20.0/113114481775490/videos",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "EAAaepltWyO0BO1PTuweokvDeRtaqDFIO2Uu3TdPbNouAzqllwRxnS0oU1a77JMXKZCVuwqyKFBNkn3snZCrDrZBtpKBBd4Vami5HhIHQjiCpQRo7AulkmCMntO9mq9HqsTZAM6eE0ZCKR6pL3uh305fqox8LCSxw4niGW2ZCCJKs3UdEQTh93USS8iYYPd6oXm6HBcP8IYfAS6SvJF1IZAYl71sEPsqfgOwE31AiI4ZD"
+            },
+            {
+              "name": "description",
+              "value": "={{ $('Switch').item.json.Title }}\n\n{{ $('Switch').item.json.Title\n}}"
+            },
+            {
+              "name": "published",
+              "value": "false"
+            },
+            {
+              "name": "video_state",
+              "value": "REELS"
+            },
+            {
+              "name": "scheduled_publish_time",
+              "value": "={{ $('Switch').item.json.unixTimestamp }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        580,
+        320
+      ],
+      "id": "fed809be-eff3-41d9-900f-028954e57f2d",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph-video.facebook.com/v20.0/113114481775490/videos",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "EAAaepltWyO0BO1PTuweokvDeRtaqDFIO2Uu3TdPbNouAzqllwRxnS0oU1a77JMXKZCVuwqyKFBNkn3snZCrDrZBtpKBBd4Vami5HhIHQjiCpQRo7AulkmCMntO9mq9HqsTZAM6eE0ZCKR6pL3uh305fqox8LCSxw4niGW2ZCCJKs3UdEQTh93USS8iYYPd6oXm6HBcP8IYfAS6SvJF1IZAYl71sEPsqfgOwE31AiI4ZD"
+            },
+            {
+              "name": "description",
+              "value": "={{ $('Switch').item.json.Title }}\n\n{{ $('Switch').item.json.Title\n}}"
+            },
+            {
+              "name": "published",
+              "value": "false"
+            },
+            {
+              "name": "video_state",
+              "value": "REELS"
+            },
+            {
+              "name": "scheduled_publish_time",
+              "value": "={{ $('Switch').item.json.unixTimestamp }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        760,
+        320
+      ],
+      "id": "e028560b-1864-443d-8f87-b3f0cfa148cd",
+      "name": "HTTP Request2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find ID of File": {
+      "main": [
+        [
+          {
+            "node": "Download Photo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Photo": {
+      "main": [
+        [
+          {
+            "node": "Facebook Graph API1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Video": {
+      "main": [
+        [
+          {
+            "node": "Facebook Graph API2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find ID of File1": {
+      "main": [
+        [
+          {
+            "node": "Download Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Find ID of File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Find ID of File1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Find ID of File2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Video1": {
+      "main": [
+        [
+          {
+            "node": "Facebook Graph API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find ID of File2": {
+      "main": [
+        [
+          {
+            "node": "Download Video1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook Graph API1": {
+      "main": [
+        [
+          {
+            "node": "Facebook Photos1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook Graph API": {
+      "main": [
+        [
+          {
+            "node": "Facebook Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook Graph API2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5bfbcc13-23ed-451f-8a29-d2a924bbb5c1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cc18735aefda8a09008f693b61ff4376f651ad1ef69c0d04c44d62c1c22c17b4"
+  },
+  "id": "OmNWDDhYtQssKwDV",
+  "tags": []
+}
