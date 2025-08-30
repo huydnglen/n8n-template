@@ -1,0 +1,1316 @@
+{
+  "name": "page_to_page",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Chuyển đổi thành nội dung có tính hấp dẫn hơn mà không thay đổi ý nghĩa của bài viết\n\nbài viết:\n{{ $('Code2').item.json.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        1360,
+        500
+      ],
+      "id": "9039acc1-4820-4d25-bd07-4b24b3734491",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1440,
+        -280
+      ],
+      "id": "101526f0-39b4-4225-a95a-2b7fdf6eb29a",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "GrP9LVTieDUj0VL9",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "4b2d1ca6-a652-439c-9bbe-1d96defed70c",
+                    "leftValue": "={{ $('Code2').item.json.type }}",
+                    "rightValue": "album",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "album"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "94ac789e-3416-4d77-aebd-3f106efcf407",
+                    "leftValue": "={{ $('Code2').item.json.type }}",
+                    "rightValue": "photo",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "IMAGE"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8235cad6-c356-4653-befd-7a3f82f2f3a9",
+                    "leftValue": "={{ $('Code2').item.json.video_container_type }}",
+                    "rightValue": "CONTAINED_POST_ATTACHMENT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "VIDEO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fbb7f3c6-ea68-4396-8778-6e246edc2124",
+                    "leftValue": "={{ $('Code2').item.json.video_container_type }}",
+                    "rightValue": "FB_SHORTS_POST",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "REELS"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        760,
+        60
+      ],
+      "id": "f4123829-413f-4fbf-bf9b-4edb0670b996",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Chuyển đổi thành nội dung có tính hấp dẫn hơn mà không thay đổi ý nghĩa của bài viết\n\nbài viết:\n{{ $('Code2').item.json.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        1380,
+        80
+      ],
+      "id": "03f320fb-cfbb-42cb-aa38-7ceee34cc1cf",
+      "name": "Basic LLM Chain1"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Code2').item.json.browser_native_hd_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1820,
+        80
+      ],
+      "id": "72980ea8-fc58-47da-bc52-b77790ab2037",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Chuyển đổi thành nội dung có tính hấp dẫn hơn mà không thay đổi ý nghĩa của bài viết\n\nbài viết:\n{{ $('Code2').item.json.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        1380,
+        -140
+      ],
+      "id": "818c4c7e-efb1-437a-9e69-d06d14ebed50",
+      "name": "Basic LLM Chain2"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Code2').item.json.image_urls[0] }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1820,
+        -140
+      ],
+      "id": "45d25088-ffb9-411e-a2c7-6c2ffc8037b4",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/apify~facebook-posts-scraper/run-sync-get-dataset-items?token=apify_api_lHBtlRljggXZjCgPMKuxhumIMMdTBB0jD7RT",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"captionText\": false,\n    \"resultsLimit\": 1,\n    \"startUrls\": [\n        {\n            \"url\": \"{{ $json.link_page }}\",\n            \"method\": \"GET\"\n        }\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -360,
+        80
+      ],
+      "id": "ab207cf9-11ab-403a-a17d-4460f9c5ecb1",
+      "name": "get_data"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nreturn items.map(item => {\n  const media = item.json.media || [];\n\n  // Trường hợp 1 ảnh (có key photo_image trong media[0])\n  const hasSinglePhoto = media.length === 1 && media[0].photo_image?.uri;\n\n  // Trường hợp nhiều ảnh (sau phần tử đầu tiên là media thực)\n  const multiplePhotoItems = media.filter(m =>\n    m?.__typename === 'Photo' && m?.image?.uri\n  );\n\n  // Nếu chỉ có 1 ảnh dạng photo_image\n  let imageUrls = [];\n  let thumbnails = [];\n\n  if (hasSinglePhoto) {\n    imageUrls.push(media[0].photo_image.uri);\n    thumbnails.push(media[0].thumbnail || media[0].photo_image.uri);\n  } else if (multiplePhotoItems.length > 0) {\n    imageUrls = multiplePhotoItems.map(m => m.image.uri);\n    thumbnails = multiplePhotoItems.map(m => m.thumbnail || m.image.uri);\n  }\n\n  let type = 'text';\n  if (imageUrls.length > 1) type = 'album';\n  else if (imageUrls.length === 1) type = 'photo';\n\n  return {\n    json: {\n      text: item.json.text || '',\n      image_urls: imageUrls,\n      thumbnails: thumbnails,\n      type: type,\n      total_images: imageUrls.length,\n      post_url: item.json.url || '',\n      page_name: item.json.pageName || '',\n      thumbnail: media[0]?.thumbnail || '',\n      video_container_type: media[0]?.video_container_type || '',\n      dash_manifest: media[0]?.dash_manifest || '',\n      browser_native_hd_url: media[0]?.browser_native_hd_url || '',\n      'photo_image.uri': media[0]?.photo_image?.uri || ''\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -140,
+        80
+      ],
+      "id": "9465beed-a3df-4e4b-b1d2-bf4582d8b465",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "image_urls",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1380,
+        -680
+      ],
+      "id": "51f67ecf-0e58-42eb-9424-b7410b966aa6",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.cloudinary.com/v1_1/dyto3wcfm/image/upload",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "upload_preset",
+              "value": "=q3x3ji0y"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1880,
+        -680
+      ],
+      "id": "2458038a-3956-4cd1-afbb-c396608e4947",
+      "name": "tải ảnh lên cloud1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v20.0/115025391584003/photos",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "=EAAaepltWyO0BOzldG3NTZCMUyS35gXV9UkKPbPj4YuUbcPM3KH8ftggU7ZC7Mzs8ZBWG2nHYbXuTv4zhZA0b6E9lBihAdzz53SJBNdN8Q80WdVU8SspAlLZAXLmmwFh47bSAZCUxzFNTVeUV2zEk9AzV9zZBfHfffNjSZAxbeIz0X5nLYTYUs9hqzS5OObp6ccJLFLPKud3SZApJu0hk8b7cZD"
+            },
+            {
+              "name": "url",
+              "value": "={{ $json.url }}"
+            },
+            {
+              "name": "published",
+              "value": "false"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2080,
+        -680
+      ],
+      "id": "4ae3a2d2-ebc2-49fe-9bd0-f03214040f0e",
+      "name": "lấy image_url1"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.image_urls }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1620,
+        -680
+      ],
+      "id": "dd955e56-98d9-42a3-a4cc-91923efb6f6f",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const mediaList = $input.all().map(item => ({\n  media_fbid: item.json.id\n}));\n\nreturn [\n  {\n    json: {\n      attached_media: mediaList\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        -440
+      ],
+      "id": "e215a336-fa58-41cd-8d7d-b85d03a389bc",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v20.0/{{ $('Edit Fields1').first().json.page_id }}/feed",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Edit Fields1').first().json.accesstoken }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $('Basic LLM Chain3').item.json.text }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "attached_media",
+              "value": "={{ $('Code1').item.json.attached_media }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1840,
+        -440
+      ],
+      "id": "cebc60ae-c312-4fa2-81f4-9c2c5e84ebca",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Chuyển đổi thành nội dung có tính hấp dẫn hơn mà không thay đổi ý nghĩa của bài viết\n\nbài viết:\n{{ $('Switch').all()[0].json.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        1460,
+        -440
+      ],
+      "id": "b4dceb32-1a3d-4087-9d04-d5a2e0ab0840",
+      "name": "Basic LLM Chain3"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1380,
+        280
+      ],
+      "id": "6951d912-9fc8-4ca9-8e9c-538137fecc06",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "GrP9LVTieDUj0VL9",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -740,
+        80
+      ],
+      "id": "4f67773a-09e2-4fa9-9337-28231655748f",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v20.0/{{ $('Edit Fields1').item.json.page_id }}/photos",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Edit Fields1').item.json.accesstoken }}"
+            },
+            {
+              "name": "published",
+              "value": "true"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "source",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "caption",
+              "value": "={{ $('Basic LLM Chain2').item.json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2120,
+        -140
+      ],
+      "id": "5b40c547-7c2b-4272-897b-bf1a0caf2a4c",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v20.0/{{ $('Edit Fields1').item.json.page_id }}/videos",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Edit Fields1').item.json.accesstoken }}"
+            },
+            {
+              "name": "published",
+              "value": "true"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "source",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "description",
+              "value": "={{ $('Basic LLM Chain1').item.json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2120,
+        80
+      ],
+      "id": "cf0ac9ef-3eb9-474a-8463-b3732d1fe8de",
+      "name": "HTTP Request6"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Switch').item.json.browser_native_hd_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1720,
+        500
+      ],
+      "id": "1a225b43-35aa-40cd-b797-c92776d6712a",
+      "name": "dowload video3"
+    },
+    {
+      "parameters": {
+        "name": "={{ $('get_data').item.json.postId }}.mp4",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1L2HVjjaz60pO5K_YsF32KX_JBv5PgfwI",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1L2HVjjaz60pO5K_YsF32KX_JBv5PgfwI"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1880,
+        500
+      ],
+      "id": "4b80eea0-dc5a-4aff-9820-e7226f2a8d3b",
+      "name": "Google Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "59ciYM9bicDaf6Iw",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v20.0/{{ $('start1').first().json.video_id }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Edit Fields1').item.json.accesstoken }}"
+            },
+            {
+              "name": "published",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2060,
+        740
+      ],
+      "id": "a192d27c-5257-46c0-bcb7-95236c2ed503",
+      "name": "Publish",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph-video.facebook.com/v20.0/{{ $('Edit Fields1').item.json.page_id }}/video_reels",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Edit Fields1').item.json.accesstoken }}"
+            },
+            {
+              "name": "upload_phase",
+              "value": "start"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2040,
+        500
+      ],
+      "id": "42c28c7f-3df5-48b2-b678-e69a34abd4a0",
+      "name": "start1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph-video.facebook.com/v23.0/{{ $('Edit Fields1').item.json.page_id }}/video_reels",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Edit Fields1').item.json.accesstoken }}"
+            },
+            {
+              "name": "upload_phase",
+              "value": "FINISH"
+            },
+            {
+              "name": "video_id",
+              "value": "={{ $('start1').first().json.video_id }}"
+            },
+            {
+              "name": "description",
+              "value": "={{ $('Basic LLM Chain').item.json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1860,
+        740
+      ],
+      "id": "b98b3a6e-7f04-47c9-bb40-4ac634da5aab",
+      "name": "finish1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('start1').item.json.upload_url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=OAuth {{ $('Edit Fields1').item.json.accesstoken }}"
+            },
+            {
+              "name": "Offset",
+              "value": "0"
+            },
+            {
+              "name": "X-Entity-Length",
+              "value": "={{ $('Google Drive').item.json.size }}"
+            },
+            {
+              "name": "X-Entity-Name",
+              "value": "={{ $('Google Drive').item.json.name }}"
+            },
+            {
+              "name": "X-Entity-Type",
+              "value": "video/mp4"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1660,
+        740
+      ],
+      "id": "6d1c84fe-508f-4d99-9741-3541953f246c",
+      "name": "transfer1"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Google Drive').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1420,
+        740
+      ],
+      "id": "6f3846f2-06eb-41d6-9888-60777b04c40f",
+      "name": "Download Photo2",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "maxTries": 5,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "59ciYM9bicDaf6Iw",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ac37cda6-e574-4921-8ebb-aca9e66ff100",
+              "name": "accesstoken",
+              "value": "EAAaepltWyO0BOZBflZBpUb9f5t8sqmRKxltxOfOi7dvo2QZCiiVOZChkZC0nuFCbAdo81ZBYZBPjFQzNSXRPTN7oMk24wpkGZArTKDCOnduMdgGgyPQiLyy3wZByaZAfGmZAY73IZC7VZBpoNyRCBUARgj3ZByOmZAtwSHjhA2ZCdQoCGZBag95tZAf6AFxltGqR86mgNSZAmn5kjxlhkvSYqeQBzLwYwsZD",
+              "type": "string"
+            },
+            {
+              "id": "76e69870-729c-4532-a744-f838a45a15d1",
+              "name": "page_id",
+              "value": "115025391584003",
+              "type": "string"
+            },
+            {
+              "id": "022f0dc0-4ffc-4c44-b3ca-39459acb297c",
+              "name": "link_page",
+              "value": "https://www.facebook.com/phanhhh3d",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -540,
+        80
+      ],
+      "id": "9c643f86-9425-40e1-ae89-19b7f2d36680",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "10T7YFgz88ghHagZgN1T9aeQV_YgBFMxcqepyvc8DnL4",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Trang tính1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10T7YFgz88ghHagZgN1T9aeQV_YgBFMxcqepyvc8DnL4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "post_id": "={{ $json.postId }}",
+            "url": "={{ $json.url }}",
+            "text": "={{ $json.text }}"
+          },
+          "matchingColumns": [
+            "post_id"
+          ],
+          "schema": [
+            {
+              "id": "post_id",
+              "displayName": "post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "text",
+              "displayName": "text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -140,
+        280
+      ],
+      "id": "c59f8276-563c-4feb-99af-4740dffb5559",
+      "name": "Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "J0J1yWqJT32XRxHE",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "10T7YFgz88ghHagZgN1T9aeQV_YgBFMxcqepyvc8DnL4",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Trang tính1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10T7YFgz88ghHagZgN1T9aeQV_YgBFMxcqepyvc8DnL4/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        40,
+        80
+      ],
+      "id": "327484fb-e4ba-492e-adac-077cd67346f7",
+      "name": "Google Sheets",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "J0J1yWqJT32XRxHE",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keep": "lastItems"
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        220,
+        80
+      ],
+      "id": "42844f55-09a2-4851-9f95-c2aacc0ed27f",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2bd74ebe-ed07-43bc-b3df-3a39c88c955b",
+              "leftValue": "={{ $('get_data').item.json.postId }}",
+              "rightValue": "={{ $json.post_id }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        80
+      ],
+      "id": "03627d32-939b-45c8-b761-91f368730e73",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lấy dữ liệu gốc từ Code2\nconst original = $('Code2').first().json;\nconst items = $input.all();\n\nreturn items.map(item => {\n  return {\n    json: {\n      image: item.json,         // đây là URL từng ảnh từ Split Out\n      text: original.text,\n      type: original.type,\n      image_urls: original.image_urls,\n      total_images: original.total_images,\n      post_url: original.post_url,\n      page_name: original.page_name,\n      video_container_type: original.video_container_type,\n      dash_manifest: original.dash_manifest,\n      browser_native_hd_url: original.browser_native_hd_url\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        -680
+      ],
+      "id": "ef0b9f9f-688f-498f-af94-7440753339fb",
+      "name": "Code"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "dowload video3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_data": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "tải ảnh lên cloud1": {
+      "main": [
+        [
+          {
+            "node": "lấy image_url1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "tải ảnh lên cloud1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "lấy image_url1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "dowload video3": {
+      "main": [
+        [
+          {
+            "node": "Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive": {
+      "main": [
+        [
+          {
+            "node": "start1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish": {
+      "main": [
+        []
+      ]
+    },
+    "start1": {
+      "main": [
+        [
+          {
+            "node": "Download Photo2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "finish1": {
+      "main": [
+        [
+          {
+            "node": "Publish",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "transfer1": {
+      "main": [
+        [
+          {
+            "node": "finish1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Photo2": {
+      "main": [
+        [
+          {
+            "node": "transfer1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "get_data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2e9b8b1c-1746-411a-8347-2ebe67f2298a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6f94031800cf360cd73490963c40a8c478af67d036a3a8ff2506f42f04cabe94"
+  },
+  "id": "Dv4SpkW1QLZmGT0c",
+  "tags": []
+}
