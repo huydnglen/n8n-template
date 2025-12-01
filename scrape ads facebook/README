@@ -1,60 +1,93 @@
-Workflow này được xây dựng trên n8n, với mục đích chính là scrape (thu thập) và phân tích quảng cáo Facebook từ một fanpage cụ thể, sử dụng API của Apify (một công cụ scrape web) và tích hợp AI (OpenAI) để phân tích nội dung. Nó tập trung vào việc lấy dữ liệu quảng cáo đang hoạt động (active ads) từ Facebook Ads Library, xử lý media (hình ảnh/video), transcribe video (sử dụng AssemblyAI), phân tích bằng LLM (Large Language Model), và lưu kết quả vào Google Sheets. Cuối cùng, nó tổng hợp để đánh giá toàn bộ chiến dịch quảng cáo.
+# Facebook Ads Spy & Deep Analysis Tool  
 
-Mục tiêu tổng thể:
-Nhận input từ form: page_id (ID fanpage) và total results (số lượng quảng cáo tối đa).
-Scrape quảng cáo từ Facebook Ads Library.
-Phân loại theo display format (MULTI_IMAGES, SINGLE_IMAGE, VIDEO, v.v.).
-Xử lý media: Trích xuất URL hình ảnh/video, transcribe video sang text (bằng tiếng Việt).
-Phân tích từng quảng cáo bằng AI: Mô tả hình ảnh, transcript video, caption, CTA, và đánh giá tổng thể.
-Tổng hợp phân tích tất cả quảng cáo để đánh giá chiến dịch.
-Lưu dữ liệu thô vào sheet "DATA THÔ", phân tích chi tiết vào sheet khác, và phân tích tổng thể vào "Phân tích tổng thể".
-Thêm phần scrape comments từ posts tương ứng (nhưng chưa hoàn thiện đầy đủ trong JSON).
+## Đây là gì?
+Một workflow n8n siêu mạnh giúp bạn chỉ cần nhập 1 Page ID → tự động:
+1. Quét toàn bộ quảng cáo đang chạy của fanpage đối thủ (Facebook Ads Library)
+2. Phân loại + trích xuất sạch: text, hình ảnh, video, CTA, ngày chạy…
+3. Tự động dịch giọng nói video → text (AssemblyAI tiếng Việt)
+4. Dùng GPT-4o phân tích từng quảng cáo video
+5. Dùng GPT-4o Vision phân tích từng quảng cáo hình ảnh / carousel
+6. Tổng hợp + chấm điểm chiến dịch toàn trang (thang 1-10)
+7. Xuất toàn bộ ra Google Sheets 3 tab cực đẹp:
+   - DATA THÔ → dữ liệu gốc
+   - DATA PHÂN TÍCH → phân tích chi tiết từng mẫu quảng cáo
+   - Phân tích tổng thể → báo cáo chiến lược cả chiến dịch
 
+Chỉ cần 5–15 phút là bạn có báo cáo spy đối thủ chuẩn agency mà không cần click tay.
 
-Đặc điểm nổi bật:
-Sử dụng Apify cho scrape (HTTP Request đến Apify API), AssemblyAI cho transcribe video.
-Phân loại quảng cáo bằng Switch node dựa trên displayformat.
-Xử lý video: Gửi audio_url đến AssemblyAI, poll status đến khi hoàn thành, extract transcript.
-Xử lý hình ảnh: Split URL, analyze bằng OpenAI Vision (mô tả hình ảnh).
-AI phân tích: Sử dụng GPT-4o-mini cho chain LLM (phân tích video/transcript) và AI Agent (phân tích hình ảnh).
-Tổng hợp: Aggregate outputs, sau đó dùng LLM để đánh giá chiến dịch toàn cục.
-Lưu ý: Workflow có loop (SplitInBatches) để xử lý batch quảng cáo, và wait để poll transcript status.
-Có phần scrape posts và comments (HTTP Request1, Code2, HTTP Request2), nhưng kết nối chưa đầy đủ (có thể để scrape comments từ post tương ứng với ad).
-Yêu cầu API keys: Apify token, AssemblyAI bearer, OpenAI API.
-Luồng Dữ Liệu:
+## Kết quả bạn nhận được (ví dụ thực tế)
+- Thông điệp chính họ đang đẩy mạnh nhất hiện tại
+- Mẫu sáng tạo nào đang chạy ngon nhất (hình/video/carousel)
+- CTA họ dùng hook gì, offer gì, CTA gì
+- Đối tượng họ đang target (tuổi, giới tính, khu vực, sở thích…)
+- Điểm mạnh / điểm yếu của toàn bộ chiến dịch
+- Gợi ý phản công nếu bạn là đối thủ của họ
+- Điểm số tổng thể 1-10 + lý do
 
-Form input → Scrape ads → Xử lý data → Switch theo format.
-Non-video: Split images → Analyze bằng OpenAI → AI Agent phân tích → Merge.
-Video: Transcribe bằng AssemblyAI (loop poll) → LLM Chain phân tích → Merge.
-Merge → Lưu chi tiết (Google Sheets1, không liệt kê đầy) → Aggregate → LLM tổng thể → Lưu tổng (Google Sheets2).
-Branch phụ: Loop scrape posts/comments (có thể để lấy engagement).
+## Yêu cầu để chạy được
+| Thành phần              | Bạn cần có                                                                 |
+|-------------------------|----------------------------------------------------------------------------|
+| n8n                     | n8n cloud hoặc self-host (khuyên dùng n8n cloud để không lo cookie Facebook)|
+| Apify account + API key | Đăng ký miễn phí tại apify.com → lấy API token                              |
+| AssemblyAI API key      | Đăng ký tại assemblyai.com (có $50 credit miễn phí)                         |
+| OpenAI API key          | GPT-4o + GPT-4o-mini (khuyên dùng tổ chức để chia quota)                    |
+| Google Sheets           | 1 file Google Sheets có 3 sheet sẵn (đã được cấu hình trong workflow)       |
 
+## Cách cài đặt siêu nhanh (5 phút)
 
-Yêu Cầu Kỹ Thuật:
-Workflow ID: "XeDEHGIMuhsDzO8w".
-Active: false.
-Credentials: Google Sheets OAuth2, OpenAI API, Apify token hardcoded, AssemblyAI bearer hardcoded (thay đổi để an toàn).
+1. Import workflow
+   - Copy toàn bộ JSON ở file `facebook-ads-spy-full-analysis.json`
+   - Vào n8n → Workflows → Import from Clipboard → Paste → Import
 
-Hướng Dẫn Sử Dụng Workflow
-Chuẩn Bị:
-API Keys:
-Apify: Token "apify_api_lHBtlRljggXZjCgPMKuxhumIMMdTBB0jD7RT" (thay bằng của bạn).
-AssemblyAI: Bearer "5b3fe8838188442c850007a6c565af67".
-OpenAI: Credential "OpenAi account" với API key.
-Google Sheets: ID "1s80OGxCaNIrC8fRzCMfrzr4YssrKD_YROY65FhA8bOA", sheets: "DATA THÔ" (gid=51117966), "Phân tích tổng thể" (gid=2116389451). Cột phải khớp (adArchiveID, text, v.v.).
-n8n Setup: Import JSON vào n8n, lưu workflow.
+2. Thiết lập Credentials (rất quan trọng)
+   - Google Sheets OAuth2 API → đã có sẵn trong workflow
+   - OpenAI → tạo credential tên “OpenAi account” (đã có trong workflow)
+   - Tạo 2 credential mới:
+     - HTTP Request → Basic Auth (cho Apify)
+       - Username: bất kỳ
+       - Password: dán Apify API token của bạn
+     - HTTP Request → Header Auth (cho AssemblyAI)
+       - Name: `Authorization`
+       - Value: `Bearer YOUR_ASSEMBLYAI_KEY`
 
-Import và Cấu Hình:
-Paste JSON vào n8n editor.
-Chỉnh HTTP Request1: Thay startUrls hardcoded bằng dynamic từ page_id (ví dụ: "https://www.facebook.com/{{ $json.page_id }}/").
-Kiểm tra prompts trong LLM nodes để tùy chỉnh phân tích (ngành Beauty Salon/Spa).
-Test credentials.
+3. Chỉnh lại 3 chỗ còn hard-code (nếu muốn an toàn hơn)
+   - Node “HTTP Request” (Apify ads scraper) → chuyển token sang dùng credential vừa tạo
+   - Node “Send to AssemblyAI1” + “Check transcript status1” → chuyển header Authorization sang credential
 
-Test Workflow:
-Nhấp "Test workflow", submit form với page_id (ví dụ: "vienthammydiva.vn" hoặc ID số), total results (ví dụ: 10).
-Theo dõi: Output từng node, đặc biệt poll transcript (có thể mất vài phút).
-Debug: Nếu lỗi rate limit (Apify/AssemblyAI), tăng wait time.
+4. Kích hoạt workflow → Done!
 
-Chạy Thực Tế:
-Active workflow, chạy thủ công hoặc schedule.
-Output: Dữ liệu thô và phân tích lưu vào sheets, bao gồm đánh giá chiến dịch.
+## Cách sử dụng hàng ngày
+1. Vào link form (webhook đã tạo sẵn):  
+   https://your-n8n.com/webhook/fe414c9f-9709-4ada-8c52-d7228f0d7ef9
+2. Điền:
+   - page_id → ID fanpage đối thủ (ví dụ: 143856592347231)
+   - total results → số ads muốn lấy (khuyên 50–200)
+3. Bấm Submit → đi pha ly cà phê → 5–15 phút sau mở Google Sheets là có báo cáo full
+
+## Cấu trúc Google Sheets xuất ra
+
+Link mẫu (đã public view only):  
+https://docs.google.com/spreadsheets/d/1s80OGxCaNIrC8fRzCMfrzr4YssrKD_YROY65FhA8bOA/edit?usp=sharing
+
+| Sheet               | Nội dung                                                                 |
+|---------------------|--------------------------------------------------------------------------|
+| DATA THÔ            | Dữ liệu thô từ Facebook Ads Library                                      |
+| DATA PHÂN TÍCH      | Phân tích chi tiết từng mẫu quảng cáo (có cả transcript video + phân tích hình) |
+| Phân tích tổng thể  | Báo cáo chiến lược cả chiến dịch + chấm điểm + gợi ý phản công           |
+
+## Chi phí ước tính (tháng chạy 100 fanpage)
+| Dịch vụ       | Chi phí/tháng (ước tính) |
+|----------------|------------------------------------|
+| n8n cloud      | $20–50 (tùy plan)                  |
+| OpenAI         | $30–80 (GPT-4o-mini + GPT-4o vision) |
+| AssemblyAI     | $15–40 (chỉ dùng khi có video)     |
+| Apify          | Miễn phí dưới 100k requests/tháng  |
+| Tổng          | ~1.5–3 triệu VND/tháng             |
+
+## Tác giả
+Huy Đang Lên
+
+## Cảm ơn bạn đã đọc đến đây!
+
+Thân ái,  
+Người anh em thích spy ads lúc 3h sáng
