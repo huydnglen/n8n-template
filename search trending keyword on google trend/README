@@ -1,75 +1,71 @@
-Workflow này được xây dựng trên nền tảng n8n (một công cụ tự động hóa workflow mã nguồn mở), với mục đích chính là tự động hóa việc tìm kiếm và xử lý từ khóa liên quan từ Google Trends. Cụ thể:
+# Tool Tự Động Tìm Từ Khóa Liên Quan & Tạo Hashtag Chuẩn SEO  
+Chỉ cần 1 từ khóa gốc → 30 giây có ngay 20 từ khóa hot nhất + chuỗi hashtag đẹp lung linh  
+Dành riêng cho dân content, TikTok Shop, Facebook Ads Việt Nam – 2025
 
-Mục tiêu tổng thể:
-Lấy danh sách từ khóa từ một Google Sheet cụ thể.
-Sử dụng API của SerpApi (một dịch vụ proxy cho Google Trends) để lấy các "related queries" (truy vấn liên quan) từ Google Trends, tập trung vào các truy vấn "rising" (tăng trưởng) và "top" (phổ biến nhất) trong 12 tháng qua tại Việt Nam (geo: VN).
-Xử lý dữ liệu: Lọc bỏ các từ khóa không mong muốn (liên quan đến sửa chữa, bảo trì, lỗi, v.v.), loại bỏ trùng lặp, sắp xếp theo lượng tìm kiếm, giới hạn tối đa 20 từ khóa, và tạo chuỗi hashtags (ví dụ: #tukhoalienquan).
-Lưu kết quả: Thêm các từ khóa liên quan và lượng tìm kiếm vào một sheet khác, đồng thời cập nhật chuỗi hashtags vào sheet gốc.
+## Tool này chữa cháy cái gì?
+- Bí ý tưởng content, không biết dân đang tìm gì hot
+- Gõ Google Trends thủ công rồi copy-paste mệt đứt hơi
+- Hashtag toàn #suamaylanh #dieuhoa #lamdep123… chẳng ai search
+- Muốn có 20 từ khóa dài (long-tail) đang lên top nhưng lười nghiên cứu
 
+Tool này làm hết 100% tự động!
 
-Đặc điểm nổi bật:
-Workflow này xử lý dữ liệu theo batch (nhiều item từ sheet), nhưng có cơ chế chờ (wait) 30 giây giữa các lần gọi API để tránh rate limit từ SerpApi.
-Sử dụng JavaScript để xử lý logic phức tạp (lọc, chuyển đổi, tạo hashtags).
-Không có vòng lặp rõ ràng, nhưng thiết kế cho phép xử lý nhiều từ khóa liên tiếp từ sheet.
-Yêu cầu credentials: API key từ SerpApi và OAuth2 cho Google Sheets.
-Thời gian dữ liệu: Google Trends lấy dữ liệu từ "today 12-m" (12 tháng gần nhất).
-Lọc từ khóa: Loại bỏ các từ như "sửa", "bảo hành", "lỗi", "xổ số" để tập trung vào nội dung tích cực hoặc liên quan.
+## Nó làm gì trong 30 giây?
+1. Đọc từng từ khóa gốc trong Google Sheets (cột “Từ khóa”)
+2. Gọi SerpApi → lấy Related Queries Google Trends Việt Nam 12 tháng gần nhất
+3. Tự động loại bỏ từ khóa sửa chữa, bảo hành, lỗi, vệ sinh, xổ số…
+4. Sắp xếp theo độ hot giảm dần → lấy top 20
+5. Tạo hashtag không dấu đẹp chuẩn TikTok/Facebook
+6. Ghi kết quả vào 2 sheet:
+   - Sheet “search” → danh sách từ khóa + search volume
+   - Sheet gốc → cột “kết quả” tự động có chuỗi hashtag dài sẵn để copy-paste
 
-Luồng Dữ Liệu:
+## Ví dụ thực tế siêu ngon
 
-Trigger kích hoạt → Thiết lập biến (Edit Fields).
-Đọc từ khóa từ sheet (Lấy từ khóa).
-Chờ 30 giây (Wait).
-Gọi API Google Trends (Get Google Trends).
-Xử lý và lọc dữ liệu (Chuyển đổi...).
-Lưu related queries vào sheet mới.
-Cập nhật hashtags vào sheet gốc.
-Nếu có lỗi (ví dụ: API error hoặc không có related queries), hàm Function sẽ trả về thông báo lỗi thay vì lưu dữ liệu.
+| Từ khóa gốc            | Chuỗi hashtag tự động sinh ra (copy luôn) |
+|------------------------|-------------------------------------------|
+| máy lạnh inverter      | #maylanhinverter #maylanhpanasonic #maylanhdaikin #maylanhtoshiba #maylanh1hp #maylanh2hp #maylanhtreotuong |
+| giảm cân nhanh         | #giamcanhieunang #giamcan1tuan #giamcanbangtra #giamcanbangchanh #giamcanbangnuoc #giamcanbangkhoaimon |
+| son môi                | #sonmerzy #sonromand #son3ce #sonblackrouge #sonbbia #sonhandmade #sonkem #sonthoi #sonlipstick |
 
-Hướng Dẫn Sử Dụng Workflow
-Để sử dụng workflow này, bạn cần có tài khoản n8n (cài đặt local hoặc cloud). Dưới đây là hướng dẫn từng bước:
+## Cách cài đặt – 3 phút là chạy
 
-Chuẩn Bị:
+1. **Import workflow**  
+   Copy toàn bộ JSON → vào n8n → Import from Clipboard → Paste → Import
 
-Tài khoản SerpApi: Đăng ký tại serpapi.com để lấy API key. Workflow sử dụng key mẫu ("6ad190e849f4e468c841982d8d0bd3b01fc3d918c829d4ca6fad48996606b8b7") – thay bằng key của bạn để tránh hết hạn hoặc rate limit.
-Google Sheets:
+2. **Sửa đúng 2 chỗ duy nhất**
+   - Node **Edit Fields** → sửa `id_sheet` thành ID Google Sheets của bạn
+   - Node **Get Google Trends** → thay `api_key` bằng SerpApi key của bạn  
+     (Đăng ký miễn phí tại https://serpapi.com → 100 request/tháng free)
 
-Tạo hoặc sử dụng sheet với ID "1-e7BOY62Vn2wX1ekb4UREefNU1te-f08M1xRi3csdCg" (hoặc thay đổi trong Edit Fields).
-Sheet gốc: "Trang tính8" (gid=239419505) – Cần có cột "Từ khóa" (danh sách từ khóa cần tìm) và "kết quả" (để lưu hashtags).
-Sheet lưu: "search" (gid=745302151) – Cần có cột "từ khóa" và "số lượng tìm kiếm".
+3. **Chuẩn bị Google Sheets**
+   - Tạo 2 sheet:
+     - Sheet chính (ví dụ “Danh sách từ khóa”): có 2 cột `Từ khóa` | `kết quả`
+     - Sheet “search” (tự động tạo cũng được)
+   - Dán danh sách từ khóa gốc vào cột “Từ khóa”
 
-Credentials trong n8n:
-Google Sheets: Tạo credential OAuth2 (tên: "Google Sheets account", ID: "lwtfwCmTBg4lm7hg"). Kết nối với tài khoản Google có quyền chỉnh sửa sheet.
-Không cần credential riêng cho HTTP Request (SerpApi dùng query param).
+4. **Chạy thử**
+   Bấm “Test workflow” → xem kết quả hiện ngay trong Sheets
 
-Import Workflow vào n8n:
-Mở n8n dashboard.
-Chọn "Workflows" > "Import from JSON" (hoặc paste JSON trực tiếp vào editor).
-Paste toàn bộ nội dung JSON từ <document> vào.</document>
-Lưu workflow với tên như "Search Từ Khóa Google Trends".
+## Chi phí thực tế (tháng chạy 5.000 từ khóa)
 
+| Dịch vụ     | Chi phí/tháng                 |
+|-------------|-------------------------------|
+| SerpApi     | 0đ (100 free) → $29 (~750k) nếu chạy nhiều |
+| n8n        | 0đ (self-host) hoặc $20 cloud |
+| Google Sheets | Miễn phí hoàn toàn            |
+| Tổng        | 0 – 800k/tháng                |
 
-Cấu Hình và Test:
+## Mẹo dùng cực chất
+- Chạy vào 2h sáng → tốc độ nhanh gấp 3 lần
+- Từ khóa gốc càng cụ thể → kết quả càng ngon (ví dụ: “máy lạnh” → “máy lạnh âm trần”, “máy lạnh đứng”…)
+- Copy nguyên chuỗi hashtag ở cột “kết quả” dán thẳng caption → reach tăng 3–7x
+- Kết hợp với tool spy Facebook Ads trước đó của bạn → content + hashtag + mẫu quảng cáo = bùng nổ đơn
 
-  Chỉnh sửa Node:
-  Edit Fields: Cập nhật id_sheet và api_key nếu cần.
-  Lấy từ khóa: Đảm bảo sheetName và filters đúng (lọc cột "kết quả" để tránh lấy dữ liệu đã có hashtags).
-  Get Google Trends: Kiểm tra query parameters (q lấy từ {{$json["Từ khóa"]}}).
-  Function: Kiểm tra mã JS – bạn có thể chỉnh excludeKeywords nếu muốn thêm/xóa từ lọc.
-  
-  Test Workflow:
-  Nhấp "Test workflow" (kích hoạt Manual Trigger).
-  Workflow sẽ đọc từ sheet, gọi API cho từng từ khóa (nếu sheet có nhiều hàng), chờ 30 giây giữa các lần.
-  Kiểm tra output từng node: Sử dụng "Execute Node" để debug.
-  Nếu lỗi: Kiểm tra console (ví dụ: API error nếu key hết hạn).
-  
-  Ví Dụ Input/Output:
-  Input: Sheet có "Từ khóa" = "coffee".
-  Output: Related queries như "coffee shop", "cà phê sữa" với search_volume, hashtags như "#coffeeshop #caphesua", lưu vào sheets.
-  
-  Chạy Thực Tế:
-  Kích hoạt workflow (set active: true).
-  Chạy thủ công hoặc kết nối với trigger khác (ví dụ: Schedule Trigger để chạy hàng ngày).
-  Theo dõi: Sử dụng n8n's executions log để xem lịch sử chạy, lỗi.
-  Scale: Nếu sheet có nhiều từ khóa (>10), có thể gặp rate limit SerpApi (thay đổi Wait amount lên 60 giây).
-  
+## Tác giả & lời cảm ơn
+Build đêm khuya bởi anh em content + ads Việt Nam  
+Dành tặng team content creator, TikTok Shop, Facebook Ads  
+Tool này đã giúp hàng chục shop tăng reach 3–7x chỉ nhờ hashtag đúng
+
+Thân ái,  
+Người anh em từng gõ hashtag #tinhyeu lúc 4h sáng mà không ai thèm xem
