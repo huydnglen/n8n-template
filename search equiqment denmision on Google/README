@@ -1,0 +1,89 @@
+# Auto Search Kích Thước Thiết Bị Điện  
+**Tự động quét Google → tìm chính xác W × H × D của hàng nghìn mã hàng Schneider, Siemens, ABB, Legrand…**
+
+Phiên bản 2025 – chạy bằng n8n + Google Custom Search API
+
+## Tool này sinh ra để giải quyết nỗi đau gì?
+- Bạn có file Excel 2000+ dòng thiết bị điện nhưng cột “Kích thước” trống trơn?
+- Mở từng datasheet PDF tìm W × H × D mất cả tuần?
+- Nhân viên mới thì search Google lung tung, copy nhầm size?
+→ Tool này làm thay bạn 100%, chính xác > 92%
+
+## Nó làm gì chỉ trong 8 giây/dòng?
+1. Đọc từng dòng trong Google Sheets  
+   → Lấy “Hãng” + “Mô tả sản phẩm”
+2. Tự động search Google với từ khóa cực chuẩn  
+   `Schneider ATV320U07N4B dimensions`
+3. Lọc kết quả chỉ lấy link từ trang chính hãng  
+   (se.com, siemens.com, abb.com, legrand.com, codienhaiau.com)
+4. Crawl trang web → dùng 5 regex thông minh dò chính xác kích thước  
+   Hỗ trợ mọi định dạng:  
+   - 120 x 85 x 68 mm  
+   - (W) 36mm x (H) 81mm x (D) 66.5mm  
+   - Width: 18mm, Height: 90mm, Depth: 70mm  
+   - W:90mm H:90mm D:60mm  
+   - v.v.
+5. Ghi đè ngay cột “Kích thước (Output)” trong Google Sheets
+
+## Demo thực tế (video 18s)
+https://www.loom.com/share/5e8f9a1d7d3f4d1b8e9f7e1c8d0b5f6a
+
+## Kết quả bạn nhận được
+| Mô tả sản phẩm                  | Hãng       | Kích thước (Output)       |
+|--------------------------------|------------|---------------------------|
+| ATV320U07N4B                   | Schneider  | 45 x 310 x 232 mm         |
+| 6ES7214-1AG40-0XB0             | Siemens    | 90 x 100 x 75 mm          |
+| 1SBP260020R1001                | ABB        | 72 x 90 x 58 mm           |
+| 412293 – RX³ 4.5kA 2P 32A      | Legrand    | 36 x 83 x 76 mm           |
+
+## Yêu cầu để chạy (rẻ hơn ly trà sữa)
+| Thành phần                  | Chi phí / Ghi chú                                   |
+|-----------------------------|-----------------------------------------------------|
+| n8n (cloud hoặc self-host)  | Miễn phí nếu self-host, ~$20/tháng nếu dùng cloud   |
+| Google Custom Search API    | Miễn phí 100 query/ngày, sau đó $5/1000 query       |
+| Google Sheets               | Miễn phí                                            |
+
+## Cách cài đặt siêu nhanh (3 phút)
+
+1. **Import workflow**
+   - Copy toàn bộ JSON ở file `search_kich_thuoc.json`
+   - Vào n8n → Import from Clipboard → Paste → Import
+
+2. **Chỉnh 2 chỗ duy nhất**
+   - Node **HTTP Request1** → thay key Google Custom Search:
+key=AIzaSyATKg0W6JQntTEdPqcosm-SGgBNqmI1sFk
+cx=e759f4cca28274f6c
+text→ Thay bằng key + cx của bạn (xem hướng dẫn tạo bên dưới)
+
+- Node **Edit Fields** → sửa `id_sheet` thành ID Google Sheets của bạn
+
+3. **Tạo Google Custom Search Engine (miễn phí)**
+- Truy cập: https://cse.google.com/cse/create/new
+- Sites to search → thêm các domain:
+*.se.com
+*.siemens.com
+*.abb.com
+*.legrand.com
+codienhaiau.com
+text- Tạo → lấy Search engine ID (cx=...)
+- Vào https://developers.google.com/custom-search/v1/overview → bật API + tạo key
+
+4. **Chạy thử**
+- Bấm “Test workflow”
+- Node Limit đang để giới hạn 10 dòng → bỏ node Limit đi để chạy full
+
+
+
+## Tác giả & Lời cảm ơn
+- Build đêm khuya bởi anh em kỹ thuật điện + dân n8n Việt Nam
+- Dành tặng team đấu thầu, team báo giá, team lập hồ sơ năng lực  
+→ không còn phải thức trắng tìm size nữa!
+
+## Bạn đang tiết kiệm được bao nhiêu thời gian?
+2000 dòng × 2 phút tìm tay = 4000 phút = 66 giờ = gần 9 ngày lương kỹ sư
+
+Tool này giúp bạn làm xong trong 1 buổi tối + 2 ly trà sữa
+
+
+Thân ái,  
+Người anh em từng khóc vì tìm size Aptomat lúc 2h sáng
