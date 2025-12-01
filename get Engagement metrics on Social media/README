@@ -1,0 +1,67 @@
+# Get Social Stats – Thu thập lượt xem, like, comment tự động từ Instagram Reels + Facebook Reels + YouTube (n8n)
+
+> **Tự động lấy thống kê tương tác (views, likes, comments) của:**
+> - Instagram Reels (từ tài khoản Business/Creator)
+> - Facebook Reels (video ≤ 60s trên Page)
+> - YouTube Shorts & Video (từ Channel bất kỳ)
+
+→ Ghi lại + cập nhật liên tục vào Google Sheets (không bị trùng, tự động phân trang)
+
+## Workflow làm được gì?
+
+| Nền tảng         | Lấy được dữ liệu                                   | Sheet đích        |
+|------------------|----------------------------------------------------|-------------------|
+| Instagram Reels  | Views, Likes, Comments, Link, Timestamp            | Trang tính6       |
+| Facebook Reels   | Views, Likes, Comments, Link, Thời gian đăng      | Trang tính4       |
+| YouTube (all)    | Views, Likes, Comments, Favorites, Title           | Trang tính3       |
+
+Hoàn toàn tự động phân trang (pagination) cho cả 3 nền tảng → lấy hết dữ liệu dù có hàng nghìn video!
+
+## Screenshot
+
+## Yêu cầu bắt buộc
+- n8n version ≥ 1.60
+- Google Sheets credential (OAuth2)
+- Facebook Page Access Token có quyền: `pages_read_engagement`, `pages_manage_metadata`, `instagram_basic`, `instagram_manage_insights`
+- YouTube Data API v3 Key (bật trong Google Cloud Console)
+
+## Cách cài đặt siêu nhanh (30 giây)
+
+1. Copy file `get_social.json`
+2. Vào n8n → Import from Clipboard (Ctrl+V)
+3. Mở node **Edit Fields1** → sửa các giá trị:
+   ```js
+   ins_id        → Instagram Business Account ID
+   access_token  → Page Access Token (của Page liên kết Instagram)
+   id_channel    → YouTube Channel ID (ví dụ: UCZHTVdSA-zXTQ2HlCsFs9Lg)
+   api_key       → YouTube Data API Key
+   page_id       → Facebook Page ID (dùng để lấy Reels)
+4.Kết nối credential Google Sheets
+5.Nhấn Execute Workflow → Xong!
+
+
+- File tải về
+get_social.json
+
+Cấu trúc Google Sheets mẫu (đã tạo sẵn trong workflow)
+textSheet "Trang tính6" → Instagram Reels
+Sheet "Trang tính4" → Facebook Reels (≤60s)
+Sheet "Trang tính3" → YouTube Videos & Shorts
+Lưu ý quan trọng
+
+-Instagram Reels chỉ lấy được nếu tài khoản đã chuyển sang Business/Creator và liên kết với Facebook Page
+-Facebook Reels: chỉ lấy video có length ≤ 60 giây
+-YouTube: lấy được cả video dài và Shorts (không phân biệt)
+-API Facebook/Instagram có giới hạn rate limit → chạy mỗi 5–10 phút là an toàn nhất
+
+Rất hoan nghênh Pull Request!
+Tác giả
+Huy Đang Lên
+Dành cho anh em làm content, quản lý Fanpage, chạy ads
+
+License
+MIT © 2025 – Dùng thoải mái, nhớ cho 1 star nếu thấy hữu ích nhé!
+
+⭐ Star repo để ủng hộ mình tiếp tục làm các workflow ngon khác nha!
+Cảm ơn bạn rất nhiều!
+
