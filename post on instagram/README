@@ -1,0 +1,66 @@
+# Instagram Auto Post (Reels + Photo) từ Google Sheets + Google Drive – Không cần app, không cần điện thoại!
+
+> **Chỉ cần điền Google Sheets → Tự động đăng:**
+> - Instagram **Reels** (video)
+> - Instagram **Photo** (ảnh feed)
+> - Tự động tìm file đúng tên trong Google Drive
+> - Tự động upload lên Cloudinary → đăng qua Instagram Graph API
+> - Tự động đánh dấu "Đã đăng" trong Google Sheets
+> - Chạy mỗi phút → đăng liên tục, không giới hạn!
+
+Không cần điện thoại, không cần app bên thứ ba, không bị block!
+
+## Tính năng siêu đỉnh
+- Đăng **Reels + Photo** hoàn toàn tự động
+- Tự động tìm file theo tên (không cần link)
+- Upload qua **Cloudinary** (miễn phí 25GB/tháng)
+- Đăng chính xác caption từ Google Sheets
+- Tự động đánh dấu cột **Posted = "Đã đăng"**
+- Chạy mỗi phút → có thể đăng 100+ bài/ngày
+- Không bị Instagram block (dùng chính thức Graph API)
+
+## Cấu trúc Google Sheets (Trang tính5) – Bắt buộc đúng tên cột
+
+| File_Name           | Caption                              | type   | Posted     |
+|---------------------|--------------------------------------|--------|------------|
+| reels-trend-hot.mp4 | Caption reels cực chất đây nè!       | video  |            |
+| anh-dep-nhat.jpg    | Hôm nay xinh quá trời luôn           | photo  | Đã đăng    |
+
+**Lưu ý quan trọng**:
+- `File_Name`: tên file phải trùng 100% (có đuôi .mp4, .jpg)
+- `type`: chỉ ghi `video` hoặc `photo`
+- `Posted`: để trống → workflow sẽ tự ghi "Đã đăng" khi xong
+
+## Cách cài đặt (chỉ 3 phút)
+
+1. **Import workflow**
+   - Copy file `-> Insgram.json`
+   - Vào n8n → Import → Dán (Ctrl+V)
+
+2. **Cấu hình 4 chỗ quan trọng**
+   - **Edit Fields** node:
+     - `ins_id`: Instagram Business Account ID (của bạn)
+     - `aaccesstoken`: Page Access Token (có quyền `instagram_content_publish`)
+     - `cloud_name`, `upload_preset`: lấy từ Cloudinary Dashboard
+   - **Google Sheets nodes**: đã trỏ đúng sheet → chỉ cần kiểm tra lại ID file
+   - **Find ID of File** node:
+     - Thay Folder ID: `15sF5vFnJHzbhDjDwNNCo6UvNts73-8yj` → ID thư mục Google Drive chứa ảnh/video
+
+3. **Active workflow → Xong!**
+
+→ Mỗi phút tự động kiểm tra và đăng bài mới!
+
+## File tải về
+- [-> Insgram.json](->%20Insgram.json)
+
+## Screenshot workflow
+
+## Tác giả
+- Huy Đang Lên
+- Dành cho anh em KOL, shop online, agency, creator
+
+## License
+MIT © 2025 – Dùng thoải mái, fork thoải mái, nhớ star nếu thấy hay nha!
+
+---
+
