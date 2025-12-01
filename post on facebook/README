@@ -1,0 +1,62 @@
+# GGS + Google Drive → Facebook Auto Post (Photo + Video + Reels) – Đăng bài hẹn giờ chuẩn xác 100%
+
+> **Chỉ cần điền Google Sheets → Tự động:**
+> - Lấy ảnh/video từ Google Drive theo đúng tên file
+> - Đăng hẹn giờ chính xác từng giây lên Facebook Page
+> - Hỗ trợ **3 loại bài**: Photo, Video thường, **Reels**
+> - Không cần tool bên thứ 3, không cần Creator Studio!
+
+Đã test ổn định hàng nghìn bài/tháng cho nhiều Fanpage lớn tại Việt Nam
+
+## Tính năng đỉnh cao
+| Loại bài     | Hỗ trợ đăng hẹn giờ | Ghi chú                                 |
+|--------------|---------------------|-----------------------------------------|
+| Photo        | Yes                 | Đăng dạng album nếu nhiều ảnh           |
+| Video thường | Yes                 | Dùng `/me/videos`                               |
+| Reels        | Yes                 | Dùng `graph-video.facebook.com` + `REELS` state |
+
+- Hẹn giờ chính xác đến từng giây (dùng múi giờ Việt Nam +07:00)
+- Tự động chuyển định dạng ngày/giờ từ Google Sheets → Unix timestamp
+- Tự động tìm file đúng tên trong Google Drive (không cần link)
+- Retry tự động khi lỗi mạng/API
+
+## Cấu trúc Google Sheets (bắt buộc đúng tên cột)
+
+| Ngày đăng   | Giờ đăng | Type   | File (tên file chính xác)       | Title       | Content                  |
+|-------------|----------|--------|----------------------------------|-------------|--------------------------|
+| 15/4/2025   | 09:30    | photo  | anh-bia-dep.jpg                  | Tiêu đề     | Nội dung bài viết        |
+| 16/4/2025   | 20:30    | reels  | reels-trend-hot.mp4              | Trend hôm nay | Caption reels           |
+| 17/4/2025   | 15:00    | video  | video-review-san-pham.mp4        | Review SP   | Mô tả chi tiết           |
+
+**Quan trọng**: Tên file trong cột **File** phải trùng 100% (bao gồm đuôi .jpg, .mp4)
+
+## Cách cài đặt (chỉ 3 phút)
+
+1. **Import workflow**
+   - Copy file `GGS + GG DRIVE -> FACEBOOK.json`
+   - Vào n8n → Import → Dán (Ctrl+V)
+
+2. **Cấu hình 4 chỗ quan trọng**
+   - **Google Sheets node**: Chọn đúng Spreadsheet + Sheet (Trang tính1)
+   - **Google Drive nodes**:
+     - Thay Folder ID: `15sF5vFnJHzbhDjDwNNCo6UvNts73-8yj` → ID thư mục chứa ảnh/video của bạn
+   - **Facebook nodes**:
+     - Kết nối credential Facebook Page (có quyền `pages_manage_posts`, `pages_read_engagement`)
+     - Node **HTTP Request / HTTP Request1 / HTTP Request2**: Thay Page ID `113114481775490` → ID Page của bạn
+   - **Schedule Trigger**: Đặt giờ chạy (hiện tại: 9h – 15h – 20h30 hàng ngày)
+
+3. **Active workflow → Xong!**
+
+## File tải về
+- [GGS + GG DRIVE -> FACEBOOK.json](GGS%20+%20GG%20DRIVE%20-%3E%20FACEBOOK.json)
+
+## Screenshot workflow
+
+## Tác giả
+- Huy Đang Lên
+- Dành riêng cho anh em quản lý Fanpage, agency, KOLs
+
+## License
+MIT © 2025 – Dùng thoải mái, fork thoải mái, nhớ star nếu thấy hay nha!
+
+---
