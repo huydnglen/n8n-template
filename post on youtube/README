@@ -1,0 +1,53 @@
+# TỰ ĐỘNG ĐĂNG VIDEO YOUTUBE CHÍNH CHỦ – n8n + Google Sheets + Google Drive
+> **Chỉ cần điền vào Google Sheets → Video tự động lên YouTube đúng giờ, đúng phút, có thumbnail, có playlist, có trạng thái báo về sheet!**
+
+## Tính năng SIÊU MẠNH
+
+- Hẹn giờ đăng video chính xác đến giây (publishAt)
+- Tự động tải video từ Google Drive (chỉ cần dán ID file)
+- Tự động set thumbnail (dán ID ảnh thumbnail)
+- Tự động thêm vào playlist chỉ định
+- Tự động ghi lại trạng thái upload (uploaded/processed/failed)
+- Hỗ trợ đăng đồng thời lên 7 kênh khác nhau chỉ trong 1 workflow (dễ mở rộng lên 20+ kênh)
+- Dùng resumable upload → video 5–10GB vẫn ổn định
+- Không cần bật máy tính, chạy 24/7 trên n8n cloud hoặc self-host
+
+## Cấu trúc Google Sheets (bắt buộc đúng tên cột)
+
+| STT | Tiêu đề                  | Mô tả                          | Ngày đăng | Giờ đăng | Từ khóa             | Danh mục | Danh sách phát       | File (ID Google Drive)     | Thumbnails (ID ảnh)       | thumbnails_type | Motivation For You |
+|-----|--------------------------|--------------------------------|-----------|----------|--------------------------------|----------|-----------------------|----------------------------|-----------------|---------------------|
+| 1   | Câu nói hay nhất 2025    | Động lực mỗi ngày...           | 15/04/2025| 08:00    | motivation, động lực, thành công| 22       | PLxxxYourPlaylistIDxxx| 1abc123xyz...              | 1def456uvw...             | image/jpeg      |                    |
+
+- Để trống cột cuối → workflow sẽ tự ghi `uploaded` khi thành công
+- Có thể thêm nhiều cột kênh khác (Red Devils, Gaming Hub, v.v.)
+
+## Cách cài đặt (chỉ mất 5 phút)
+
+1. **Import workflow
+   - Copy toàn bộ file JSON bên dưới
+   - Vào n8n → Workflows → Import from Clipboard (Ctrl+V)
+
+2.Cấu hình credentials
+   - Tạo OAuth2 cho YouTube (scope đầy đủ):  
+     https://www.googleapis.com/auth/youtube.upload
+   - Tạo Google Sheets + Google Drive OAuth2 như bình thường
+
+3.Sửa 2 chỗ duy nhất trong workflow
+   - Node Edit Fields:
+     ```json
+     google_sheet_id: "1sslthpwqwnu3ok1FON3VwfQ7OQLRNYdCCLNwC-4IMTc"
+
+Nếu muốn thêm/bớt kênh → copy nguyên nhánh (Get upload URL → Post video → Playlist → Thumbnail → Fill status)
+
+4.Active workflow + bật Schedule (cron) mỗi phút hoặc mỗi 5 phút
+→ Xong! Từ giờ chỉ việc điền sheet là video tự bay lên đúng giờ!
+File tải về
+POST VIDEO YOUTUBE.json
+
+Screenshot workflow
+
+Tác giả
+Huy Đang Lên
+
+License
+MIT © 2025 – Dùng thoải mái, bán lại cũng được, nhưng nhớ star & share cho anh em khác nha!
