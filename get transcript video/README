@@ -1,0 +1,64 @@
+# TikTok Video Downloader + Auto Speech-to-Text (No Watermark + Vietnamese Transcript)
+
+> **Gửi link TikTok vào Telegram → Bot tự động:**
+> - Tải video **không logo, không watermark**
+> - Tự động chuyển giọng nói thành văn bản (Speech-to-Text tiếng Việt cực chuẩn)
+> - Upload cả video + file transcript lên BunnyCDN
+> - Gửi lại link tải + toàn bộ nội dung đã chép lời trong vòng 15–30 giây!
+
+Hoàn toàn tự động, không cần Snaptik, ssstiktok hay bất kỳ trang trung gian nào!
+
+## Tính năng đỉnh cao
+- Tải video TikTok **không watermark** (chuẩn HD, playAddr gốc)
+- Tự động tạo thư mục theo thời gian (HHMMSSDDMMYYYY)
+- Upload video + file `.txt` lên **BunnyCDN** (hoặc thay bằng Backblaze, AWS S3…)
+- Dùng **AssemblyAI** chuyển âm thanh → văn bản **tiếng Việt cực chính xác**
+- Trả kết quả ngay trong Telegram (link video + link transcript + nội dung đầy đủ)
+- Chỉ hoạt động với người trong group/chat được phép (có thể mở rộng)
+
+## Yêu cầu bắt buộc
+| Dịch vụ          | Cách lấy / thiết lập                                                                 |
+|------------------|--------------------------------------------------------------------------------------|
+| Telegram Bot     | Tạo bot với @BotFather → lấy API token → thêm vào credential n8n                    |
+| BunnyCDN         | Tạo Storage Zone → lấy **Storage Endpoint** + **API Key** (AccessKey)               |
+| AssemblyAI       | Đăng ký miễn phí tại https://assemblyai.com → lấy API Key (hiện tại đang để hardcode) |
+
+## Cách cài đặt (chỉ 2 phút)
+
+1. **Import workflow**
+   - Copy toàn bộ file `download_tiktok&sound_to_text.json`
+   - Vào n8n → Import from Clipboard (Ctrl+V)
+
+2. **Cấu hình 3 chỗ quan trọng**
+   - Node **Telegram Trigger**: đã tự động → chỉ cần kết nối credential Telegram
+   - Node **Upload Video to Bunny** & **Create folder on Bunny**:
+     - Thay `n8ntesst` → tên Storage Zone của bạn
+     - Thay AccessKey: `de769e03-db9d-48c8-8df993a1e5af-26df-4f95` → key của bạn
+   - Node **Send to AssemblyAI** & **Check transcript status**:
+     - Thay API Key AssemblyAI: `5b3fe8838188442c850007a6c565af67` → key của bạn (khuyên tạo credential riêng)
+
+3. **Kích hoạt workflow → Active**
+
+4. **Thử ngay**
+   - Vào group/chat Telegram đã thêm bot
+   - Gửi 1 link TikTok bất kỳ → chờ 15–30 giây → nhận video + transcript!
+
+## File tải về
+- [download_tiktok&sound_to_text.json](download_tiktok&sound_to_text.json)
+
+## Cấu trúc link trả về
+Video URL: https://testn8n.b-cdn.net/14305215042025/video.mp4
+Transcript: https://testn8n.b-cdn.net/14305215042025/transcript.txt
+
+
+## Tác giả
+- Huy Đang Lên
+- Dành riêng cho anh em làm content, review sản phẩm, tổng hợp trend
+
+## License
+MIT © 2025 – Dùng thoải mái, tha hồ fork, nhớ star nếu thấy hay nhé!
+
+---
+
+**Star repo để mình có động lực làm tiếp các tool TikTok xịn hơn nữa nha!**  
+Cảm ơn bạn rất nhiều!
