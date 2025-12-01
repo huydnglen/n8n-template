@@ -1,0 +1,83 @@
+# Facebook Page to Page Auto Repost with AI Rewrite (n8n Workflow)
+
+> **Tự động lấy bài viết mới nhất từ một Fanpage Facebook → dùng GPT-4o-mini rewrite nội dung hấp dẫn hơn (giữ nguyên ý nghĩa) → đăng lại lên Fanpage khác với đúng định dạng gốc: ảnh đơn, album, video thường, Reels.**
+
+Hiện tại đang lấy bài từ page: **phanhhh3d** → đăng lên page đích (có thể đổi dễ dàng).
+
+## Screenshot
+
+## Tính năng nổi bật
+- Hỗ trợ đầy đủ 4 loại bài: **Text + 1 ảnh**, **Album (nhiều ảnh)**, **Video thường**, **Reels/FB Shorts**
+- Dùng **GPT-4o-mini** tự động rewrite caption hấp dẫn hơn nhưng không đổi ý nghĩa
+- Tự động tải ảnh/video về → upload lên Facebook đúng chuẩn (không bị watermark)
+- Album: upload từng ảnh riêng → lấy `media_fbid` → gắn vào bài viết (giống hệt bài gốc)
+- Video/Reels: upload qua Google Drive trung gian để tránh giới hạn kích thước
+- Kiểm tra trùng lặp bằng Google Sheets (không đăng lại bài cũ)
+- Retry + xử lý lỗi tốt (đặc biệt khi upload Reels)
+
+## Yêu cầu bắt buộc
+| Service             | Credential cần tạo trong n8n                                 |
+|---------------------|-------------------------------------------------------------|
+| OpenAI              | OpenAI API Key (dùng GPT-4o-mini)                           |
+| Facebook Graph API  | User Access Token có quyền `pages_manage_posts`, `pages_read_engagement` của page đích |
+| Google Sheets       | OAuth2 để lưu danh sách bài đã đăng (tránh duplicate)       |
+| Google Drive        | OAuth2 (dùng làm trung gian upload video/Reels lớn)         |
+| Apify (Facebook Scraper) | API token (free tier đủ dùng)                           |
+| Cloudinary (tùy chọn) | Upload preset (dùng tạm nếu muốn upload ảnh qua Cloudinary) – có thể bỏ |
+
+## Cách cài đặt & sử dụng (siêu dễ)
+
+1. **Import workflow**
+   - Copy toàn bộ file `page_to_page.json`
+   - Vào n8n → Workflows → Import from Clipboard (hoặc Ctrl+V)
+
+2. **Cấu hình các field quan trọng**
+   - Node **Edit Fields1**: 
+     - `link_page`: link Fanpage nguồn (ví dụ: https://facebook.com/phanhhh3d)
+     - `page_id`: ID Fanpage đích
+     - `accesstoken`: Access token của page đích (có quyền đăng bài)
+   - Node **Google Sheets** & **Google Sheets1**: chọn đúng Spreadsheet ID (đã tạo sẵn 1 sheet để lưu `post_id`)
+
+3. **Kết nối credential**
+   - OpenAI → chọn account
+   - Google Sheets → chọn account
+   - Google Drive → chọn account
+
+4. **Chạy thử**
+   - Nhấn “Execute Workflow”
+   - Nếu thấy bài mới được đăng lên page đích → thành công!
+
+5. **Tự động hóa**
+   - Thêm node **Schedule Trigger** (ví dụ mỗi 15–30 phút) thay cho Manual Trigger hiện tại
+
+## File tải về
+- [page_to_page.json](page_to_page.json)
+
+## Cấu trúc workflow (tóm tắt)
+Manual Trigger
+→ Edit Fields (link nguồn + token đích)
+→ Apify Facebook Scraper (lấy bài mới nhất)
+→ Google Sheets (check trùng)
+→ Code (xử lý media, phân loại ảnh/video)
+→ Switch (4 nhánh: album → photo → video → reels)
+→ GPT-4o-mini rewrite caption
+→ Tải media về → upload đúng cách → đăng bài
+
+
+## Lưu ý quan trọng
+- Access token Facebook phải là **Page Access Token** (không hết hạn nếu cấp đúng quyền)
+- Với Reels/video lớn (> 200–300MB) bắt buộc phải qua Google Drive như hiện tại
+- Có thể tắt nhánh Cloudinary nếu không cần
+
+Rất hoan nghênh Pull Request!
+
+## Tác giả
+- **Bạn là người Việt Nam dùng n8n cực chất**  
+- n8n Việt Nam Community
+
+## License
+MIT © 2025 – Cứ tự nhiên fork và dùng thoải mái!
+
+---
+
+⭐ Nếu thấy hữu ích thì cho mình 1 star trên GitHub nhé! Cảm ơn bạn rất nhiều!
