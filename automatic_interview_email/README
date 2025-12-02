@@ -1,1 +1,68 @@
+Giới thiệu
+Workflow này được thiết kế để tự động hóa quy trình xử lý phỏng vấn ứng viên cho vị trí Automations Specialist tại công ty Flow Pilot. Nó sử dụng N8N để tích hợp Gmail, Google Calendar, Google Sheets, Discord và mô hình ngôn ngữ Google Gemini (PaLM) để:
 
+Phát hiện và xử lý email phỏng vấn dựa trên nhãn (Initial Interview, Final Interview, Negative).
+Tự động gửi email phản hồi cho ứng viên (cảm ơn, xác nhận vòng cuối, hoặc từ chối).
+Tạo sự kiện lịch Google Calendar với liên kết Google Meet.
+Cập nhật thông tin ứng viên vào Google Sheets.
+Gửi thông báo đến kênh Discord cho người phỏng vấn.
+Lên lịch chạy định kỳ để kiểm tra email mới và lịch trình.
+
+Workflow được chia thành các nhánh chính:
+
+Initial Interview: Xử lý phỏng vấn ban đầu, gửi email cảm ơn với liên kết JotForm và lịch hẹn.
+Final Interview: Xử lý phỏng vấn cuối, gửi email xác nhận với liên kết đánh giá, tạo lịch Meet và thông báo Discord.
+Negative: Xử lý trường hợp từ chối, gửi email lịch sự và cập nhật Sheets.
+
+Workflow này giúp tiết kiệm thời gian, giảm lỗi thủ công và đảm bảo quy trình chuyên nghiệp.
+Yêu cầu
+Để chạy workflow này, bạn cần:
+
+N8N Instance: Phiên bản N8N tự host hoặc cloud.
+Credentials:
+Gmail OAuth2: Để đọc/gửi email.
+Google Sheets OAuth2: Để đọc/ghi dữ liệu Sheets.
+Google Calendar OAuth2: Để tạo/lấy sự kiện lịch.
+Google Gemini (PaLM) API: Để tạo nội dung email và thông báo (sử dụng mô hình chat).
+
+Cấu hình bổ sung:
+Google Sheets ID: 1MlUaUNBy6YaWdBbi87Co1QDkBQ-hHm7g19G3_g8vDRQ (có các sheet: Initial Interview, Final Interview, Negative, thank-you email).
+Discord Webhook: Cho thông báo (riêng cho initial và final).
+Liên kết cố định: JotForm, Booking Calendar, Assessment Document.
+
+Thư viện N8N: Đảm bảo cài đặt các nodes như @n8n/n8n-nodes-langchain, n8n-nodes-base.httpRequest, n8n-nodes-base.googleSheets, v.v.
+
+Cài đặt
+
+Import Workflow:
+Copy nội dung file Automations_Specialist_Assessment.json vào N8N Editor.
+Nhấn "Import from File" hoặc paste trực tiếp vào editor.
+
+Cấu hình Credentials:
+Kết nối các nodes với credentials tương ứng (Gmail, Google Sheets, Google Calendar, Google Gemini).
+Cập nhật ID Google Sheets và Discord Webhook trong nodes "Set" (ví dụ: Set Interview Config, Set Google Sheet & Discord Config).
+
+Kiểm tra và Test:
+Kích hoạt workflow (active: true).
+Test từng nhánh bằng cách gửi email mẫu với nhãn tương ứng.
+Kiểm tra lịch trình (Schedule Trigger: 15 phút cho initial, 30 phút cho tổng quát).
+
+Triển khai:
+Chạy trên server N8N production.
+Giám sát lỗi qua logs N8N.
+
+
+Sử dụng
+
+Workflow chạy tự động dựa trên lịch (mỗi 30 phút kiểm tra email mới trong 30 phút qua).
+Khi email mới có nhãn hợp lệ:
+Initial: Gửi email cảm ơn, tạo lịch Meet, cập nhật Sheets, thông báo Discord.
+Final: Gửi email xác nhận với assessment link, tạo lịch Meet với interviewer, cập nhật Sheets, thông báo Discord.
+Negative: Gửi email từ chối, cập nhật Sheets.
+
+Không xử lý email đã tồn tại trong Sheets để tránh lặp.
+
+Lưu ý:
+
+Workflow sử dụng múi giờ "Asia/Ho_Chi_Minh".
+Nội dung email/thông báo được tạo bởi AI (Google Gemini) để đảm bảo chuyên nghiệp và tự nhiên.
